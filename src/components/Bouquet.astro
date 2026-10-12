@@ -1,180 +1,337 @@
 ---
 // ─────────────────────────────────────────────────────────────
-// BUQUÊ — contador real (ver src/pages/api/bouquet.ts). Soma quando:
-// (a) alguém aperta uma das ações do cartão em "Envie uma Flor", ou
-// (b) clica direto aqui (fica pra teste/demonstração).
+// BUQUÊ — seção 3 da landing.
 //
-// Por performance, a partir de um certo número de flores o desenho
-// para de adicionar mais ícones (fica "cheio" visualmente), mas o
-// NÚMERO exibido continua sempre real — ver MAX_FLOWERS_DRAWN no script.
+// • O número exibido é o contador REAL (GET/POST em /api/bouquet).
+// • Cada vez que alguém envia um cartão em "Envie uma Flor", o evento
+//   "flor-enviada" (disparado em MandaFlores.astro) soma +1 e uma flor
+//   voa até o buquê, alternando o lado de saída (esquerda, direita...).
+// • As flores desenhadas têm LIMITE (MAX_FLOWERS = 75). Passando disso o
+//   contador continua subindo, mas o buquê fica cheio e estático.
+//
+// ONDE TROCAR POR ARTE FINAL:
+//   - Vaso:   const VASE    → preencher `src` (ex.: "/vaso.png") e ajustar a caixa
+//   - Flores: const FLOWERS → preencher `src` de cada uma (ex.: "/flores/flor-01.png")
 // ─────────────────────────────────────────────────────────────
 ---
 
 <section id="buque" class="bouquet panel panel--roxo">
   <div class="wrap bouquet__inner">
     <h2 class="bouquet__title reveal">BUQUÊ</h2>
-    <p class="eyebrow bouquet__count reveal" data-delay="0.05">
-      <span id="bouquet-count">—</span> flores enviadas
+    <p class="eyebrow bouquet__count reveal" data-delay="0.05" aria-live="polite">
+      <span id="bouquet-count">—</span> <span id="bouquet-count-label">flores enviadas</span>
     </p>
 
-    <button type="button" id="bouquet-btn" class="bouquet__stage reveal tap-target" data-delay="0.1" aria-label="Enviar uma flor (teste)">
-      <!-- Flores aparecem aqui, em leque acima do vaso -->
-      <div id="bouquet-flowers" class="bouquet__flowers" aria-hidden="true"></div>
-
-      <!-- Vaso SVG: triângulo invertido rosa -->
-      <svg class="bouquet__vase" viewBox="0 0 260 220" aria-hidden="true">
-        <polygon points="30,0 230,0 165,200 95,200" fill="var(--rosa)" />
-        <!-- borda sutil no vaso -->
-        <polygon points="30,0 230,0 165,200 95,200" fill="none" stroke="var(--rosa-soft)" stroke-width="2" />
-      </svg>
-    </button>
-
-    <p class="eyebrow bouquet__hint" id="bouquet-hint">toque pra enviar a sua (teste)</p>
+    <!-- O <svg> do buquê é criado pelo script abaixo -->
+    <div id="bouquet-stage" class="bouquet__stage reveal" data-delay="0.1" role="img" aria-label="Buquê de flores que cresce a cada cartão enviado"></div>
   </div>
 </section>
 
 <script>
-  import gsap from "gsap";
+  const NS = "http://www.w3.org/2000/svg";
 
-  const MAX_FLOWERS_DRAWN = 60;
+  /* ───────────── 1. CONFIGURAÇÃO ───────────── */
 
-  const btn = document.getElementById("bouquet-btn");
-  const flowersEl = document.getElementById("bouquet-flowers") as HTMLDivElement;
-  const countEl = document.getElementById("bouquet-count") as HTMLSpanElement;
-  const hint = document.getElementById("bouquet-hint");
+  const MAX_FLOWERS = 75;     // limite de flores desenhadas (o contador NÃO tem limite)
+  const LAYOUT_N = 100;       // "tamanho de referência" do desenho do domo — NÃO mexer: é isso que mantém o buquê
+                              // com 75 flores exatamente como foi aprovado (redondo, sem vazios)
+  const MAX_FLYERS = 4;       // se chegarem várias de uma vez (polling), só N voam; o resto aparece direto
+  const POLL_MS = 15000;      // de quanto em quanto tempo relê o contador (0 = desliga)
+  const STROKE = "#3b0d1e";   // contorno das flores (igual ao fundo da seção: --roxo)
+  const STEM = "#8f0a3d";     // cor dos caules
 
-  let drawn = 0;
+  /* Vaso. Hoje é um trapézio PLACEHOLDER.
+     Para usar o seu vaso: coloque o PNG/SVG em /public, preencha `src` e ajuste a caixa (x, y, w, h)
+     — coordenadas do SVG (viewBox 600 x 600).
+     • A imagem é encaixada na caixa mantendo a proporção, com o TOPO alinhado ao topo da caixa.
+     • A BOCA do vaso fica no topo da caixa e centralizada em x + w/2: é daí que saem os caules.
+     • O corpo do vaso precisa ser OPACO (os caules nascem "dentro" dele e ficam escondidos atrás). */
+  const VASE: { src: string | null; x: number; y: number; w: number; h: number } = {
+    src: null,                // ex.: "/vaso.png"
+    x: 190, y: 470, w: 220, h: 230,
+  };
 
-  function flowerSvg() {
-    const wrap = document.createElement("div");
-    wrap.className = "bouquet__flower";
-    wrap.innerHTML = `
-      <svg viewBox="0 0 40 40" width="22" height="22" aria-hidden="true">
-        <g transform="translate(20,20)">
-          <ellipse cx="0" cy="-9" rx="5" ry="9" transform="rotate(0)" />
-          <ellipse cx="0" cy="-9" rx="5" ry="9" transform="rotate(72)" />
-          <ellipse cx="0" cy="-9" rx="5" ry="9" transform="rotate(144)" />
-          <ellipse cx="0" cy="-9" rx="5" ry="9" transform="rotate(216)" />
-          <ellipse cx="0" cy="-9" rx="5" ry="9" transform="rotate(288)" />
-          <circle r="4" fill="var(--roxo-soft)" />
-        </g>
-      </svg>
-    `;
-    return wrap;
+  /* Flores. Cada item é um tipo; as flores sorteiam entre eles (de forma fixa por posição).
+     • src: null → flor placeholder em SVG (usa `petal` e `center`)
+     • src: "/flores/flor-01.png" → seu PNG/SVG: quadrado, fundo transparente, flor centralizada, ~256 px
+     Para ter mais variações é só adicionar itens ao array. */
+  const FLOWERS: { src: string | null; petal: string; center: string }[] = [
+    { src: null, petal: "#ff2e7e", center: "#ffe3ee" },
+    { src: null, petal: "#ca0053", center: "#ffd1e0" },
+    { src: null, petal: "#ff7ab0", center: "#7a0030" },
+    { src: null, petal: "#ffc2da", center: "#ca0053" },
+    { src: null, petal: "#e8175d", center: "#ffffff" },
+  ];
+
+  /* ───────────── 2. ELEMENTOS ───────────── */
+
+  const root = document.getElementById("buque");
+  const stage = document.getElementById("bouquet-stage");
+  const countEl = document.getElementById("bouquet-count");
+  const labelEl = document.getElementById("bouquet-count-label");
+  if (!root || !stage || !countEl || !labelEl) throw new Error("[bouquet] elementos da seção não encontrados");
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const el = (name: string, attrs: Record<string, string | number> = {}) => {
+    const n = document.createElementNS(NS, name);
+    for (const k in attrs) n.setAttribute(k, String(attrs[k]));
+    return n;
+  };
+
+  /* ───────────── 3. SVG (camadas: caules → vaso → flores → trilha → flor em voo) ───────────── */
+
+  const VB = { x: 0, y: 120, w: 600, h: 600 };
+  const CX = VASE.x + VASE.w / 2;   // centro da boca do vaso
+  const MOUTH_Y = VASE.y;           // altura da boca do vaso
+
+  const svg = el("svg", { viewBox: `${VB.x} ${VB.y} ${VB.w} ${VB.h}`, class: "bouquet__svg", "aria-hidden": "true" });
+  const stemsLayer = el("g");
+  const flowersLayer = el("g");
+  const trailLayer = el("g");
+  const flyLayer = el("g");
+
+  let vase: Element;
+  if (VASE.src) {
+    vase = el("image", { href: VASE.src, x: VASE.x, y: VASE.y, width: VASE.w, height: VASE.h, preserveAspectRatio: "xMidYMin meet" });
+  } else {
+    const inset = VASE.w * 0.27;
+    const r = VASE.x + VASE.w;
+    const b = VASE.y + VASE.h;
+    vase = el("polygon", {
+      points: `${VASE.x},${VASE.y} ${r},${VASE.y} ${r - inset},${b} ${VASE.x + inset},${b}`,
+      fill: "var(--rosa)",
+      stroke: "var(--rosa-soft)",
+      "stroke-width": 2,
+      "stroke-linejoin": "round",
+    });
+  }
+  svg.append(stemsLayer, vase, flowersLayer, trailLayer, flyLayer);
+  stage.appendChild(svg);
+
+  /* ───────────── 4. POSIÇÃO DE CADA FLOR ─────────────
+     Espiral de girassol dentro de uma elipse (domo redondo e cheio). O raio cresce com sqrt(i), então
+     as flores já colocadas nunca mudam de lugar quando entram novas. Posições determinísticas:
+     recarregar a página mostra sempre o mesmo buquê. */
+
+  function rng(seed: number) {      // mulberry32
+    let a = seed >>> 0;
+    return () => {
+      a += 0x6d2b79f5;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
   }
 
-  // Posiciona as flores em leque ACIMA do vaso (não dentro).
-  // O vaso ocupa a parte inferior do .bouquet__stage.
-  // As flores saem da boca do vaso (topo do triângulo) em arco.
-  // Posiciona flores em ARCO SEMICIRCULAR acima da boca do vaso.
-  // O vaso ocupa a metade inferior: a boca (abertura) está em ~50% do topo do stage.
-  // As flores emanam do centro desse ponto em leque de 180°.
-  function positionFlower(el: HTMLElement, index: number, total: number) {
-    // ângulo em leque: 0° = esquerda, 180° = direita (semicírculo superior)
-    // Distribui de forma ligeiramente mais densa no centro
-    const t = total <= 1 ? 0.5 : index / (total - 1);
-    // angulo de -85° a +85° (evita extremos retos demais)
-    const angleDeg = -85 + t * 170;
-    const angleRad = (angleDeg * Math.PI) / 180;
+  const DOME = { rx: 235, ry: 158, cy: MOUTH_Y - 138 };   // tamanho do domo e centro (acima da boca do vaso)
+  const GOLDEN = Math.PI * (3 - Math.sqrt(5));
 
-    // Raio: varia por "camada" (fileira) para criar profundidade
-    // Flores mais próximas do centro do índice ficam numa camada mais interna
-    const layer = Math.floor(index / 10); // camadas de 10 em 10
-    // raio em % do container: 22% (interno) a 46% (externo)
-    const baseRadius = 22 + layer * 8;
-    const radiusPct = Math.min(baseRadius + Math.random() * 6, 47);
-
-    // O ponto de origem está no centro horizontal (50%) e em ~52% de altura
-    // (ponto que corresponde à boca do vaso)
-    const originX = 50;
-    const originY = 52; // % de baixo (usando bottom, então 48% do topo)
-
-    // Converte coordenadas polares -> cartesianas relativas ao container
-    // x: centro + raio * sen(angulo)
-    // y: aumenta para cima (bottom % cresce para cima)
-    const x = originX + radiusPct * Math.sin(angleRad);
-    const y = originY + radiusPct * Math.abs(Math.cos(angleRad)) * 0.75;
-
-    const jitterX = (Math.random() - 0.5) * 5;
-    const jitterY = (Math.random() - 0.5) * 4;
-    const jitterR = (Math.random() - 0.5) * 40;
-
-    el.style.setProperty("--x", `${Math.max(5, Math.min(95, x + jitterX))}%`);
-    el.style.setProperty("--rise", `${Math.max(48, Math.min(94, y + jitterY))}%`);
-    el.style.setProperty("--rot", `${jitterR}deg`);
+  function slot(i: number) {
+    const r = rng(i * 9973 + 17);
+    const k = Math.sqrt((i + 0.5) / LAYOUT_N);
+    const th = i * GOLDEN;
+    return {
+      x: CX + Math.cos(th) * DOME.rx * k + (r() - 0.5) * 14,
+      y: DOME.cy + Math.sin(th) * DOME.ry * k + (r() - 0.5) * 12,
+      rot: r() * 360,
+      size: 40 + r() * 14,
+      variant: Math.floor(r() * FLOWERS.length),
+    };
   }
 
-  function addFlowerVisual(animate = true) {
-    if (drawn >= MAX_FLOWERS_DRAWN) {
-      // já "cheio" — só pulso visual
-      gsap.fromTo(flowersEl, { scale: 1 }, { scale: 1.04, duration: 0.14, yoyo: true, repeat: 1 });
+  /* ───────────── 5. DESENHO DA FLOR ───────────── */
+
+  function makeFlower(variant: number, size: number) {
+    const f = FLOWERS[variant % FLOWERS.length];
+    const outer = el("g");
+    const pop = el("g");
+    const sc = el("g", { transform: `scale(${size / 100})` });
+    if (f.src) {
+      sc.appendChild(el("image", { href: f.src, x: -50, y: -50, width: 100, height: 100 }));
+    } else {
+      for (let k = 0; k < 5; k++) {
+        sc.appendChild(
+          el("ellipse", { cx: 0, cy: -24, rx: 17, ry: 28, fill: f.petal, stroke: STROKE, "stroke-width": 2.5, transform: `rotate(${k * 72})` })
+        );
+      }
+      sc.appendChild(el("circle", { r: 12, fill: f.center, stroke: STROKE, "stroke-width": 2 }));
+    }
+    pop.appendChild(sc);
+    outer.appendChild(pop);
+    return { outer, pop, color: f.petal };
+  }
+
+  /* ───────────── 6. COLOCAR UMA FLOR NO BUQUÊ ───────────── */
+
+  function place(i: number, animate: boolean) {
+    if (i >= MAX_FLOWERS) return;                  // buquê cheio: nada mais é desenhado
+    const s = slot(i);
+
+    const stem = el("path", {
+      class: "bq-stem" + (animate && !reduced ? " bq-grow" : ""),
+      pathLength: 1,
+      d: `M ${CX + (s.x - CX) * 0.12} ${MOUTH_Y + 30} Q ${CX + (s.x - CX) * 0.5} ${MOUTH_Y - (MOUTH_Y - s.y) * 0.45} ${s.x} ${s.y}`,
+    });
+    stemsLayer.appendChild(stem);
+
+    const fl = makeFlower(s.variant, s.size);
+    fl.outer.setAttribute("transform", `translate(${s.x} ${s.y}) rotate(${s.rot})`);
+    if (animate && !reduced) fl.pop.setAttribute("class", "bq-pop");
+    flowersLayer.appendChild(fl.outer);
+  }
+
+  /* ───────────── 7. FLOR VOANDO DA PONTA DA SEÇÃO (alterna esquerda / direita) ───────────── */
+
+  let nextSide = -1;                               // -1 = esquerda, +1 = direita, alternando a cada flor
+
+  function startPoint(side: number) {
+    const m = svg.getScreenCTM();
+    if (!m) return { x: side < 0 ? VB.x - 60 : VB.x + VB.w + 60, y: VB.y };
+    const r = root!.getBoundingClientRect();
+    const sx = side < 0 ? r.left + 10 : r.right - 10;
+    return new DOMPoint(sx, Math.max(r.top, 0) + 10).matrixTransform(m.inverse());
+  }
+
+  function flyTo(i: number) {
+    if (i >= MAX_FLOWERS) return;
+    if (reduced) {
+      place(i, false);
       return;
     }
-    const el = flowerSvg();
-    flowersEl.appendChild(el);
-    positionFlower(el, drawn, MAX_FLOWERS_DRAWN);
-    drawn++;
+    const s = slot(i);
+    const side = nextSide;
+    nextSide = -nextSide;
 
-    if (animate) {
-      gsap.fromTo(
-        el,
-        { opacity: 0, scale: 0, y: 16 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: "back.out(1.8)" }
-      );
-    } else {
-      gsap.set(el, { opacity: 1, scale: 1, y: 0 });
+    const p0 = startPoint(side);
+    const p1 = { x: p0.x + (s.x - p0.x) * 0.6, y: p0.y + (s.y - p0.y) * 0.15 };
+    const fl = makeFlower(s.variant, s.size);
+    flyLayer.appendChild(fl.outer);
+
+    const dur = 1100;
+    const t0 = performance.now();
+    let frame = 0;
+
+    const step = (now: number) => {
+      const k = Math.min(1, (now - t0) / dur);
+      const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2; // easeInOutCubic
+      const u = 1 - e;
+      const x = u * u * p0.x + 2 * u * e * p1.x + e * e * s.x;
+      const y = u * u * p0.y + 2 * u * e * p1.y + e * e * s.y;
+      fl.outer.setAttribute("transform", `translate(${x} ${y}) rotate(${s.rot + side * 360 * e}) scale(${0.6 + 0.4 * e})`);
+
+      if (frame++ % 2 === 0 && k < 1) {            // trilha de partículas
+        const dot = el("circle", { cx: x, cy: y, r: 1.5 + Math.random() * 2.5, fill: fl.color, opacity: 0.7 });
+        trailLayer.appendChild(dot);
+        const anim = dot.animate([{ opacity: 0.7 }, { opacity: 0 }], { duration: 800, fill: "forwards" });
+        anim.onfinish = () => dot.remove();
+      }
+
+      if (k < 1) requestAnimationFrame(step);
+      else {
+        fl.outer.remove();
+        place(i, true);
+      }
+    };
+    requestAnimationFrame(step);
+  }
+
+  /* ───────────── 8. CONTADOR NA TELA ───────────── */
+
+  const fmt = (n: number) => n.toLocaleString("pt-BR");
+  let shownNumber = 0;
+
+  function renderNumber(n: number) {
+    countEl!.textContent = fmt(n);
+    labelEl!.textContent = n === 1 ? "flor enviada" : "flores enviadas";
+  }
+
+  function animateNumber(to: number) {
+    const from = shownNumber;
+    const t0 = performance.now();
+    const dur = reduced ? 0 : 600;
+    const tick = (now: number) => {
+      const k = dur ? Math.min(1, (now - t0) / dur) : 1;
+      renderNumber(Math.round(from + (to - from) * k));
+      if (k < 1) requestAnimationFrame(tick);
+      else shownNumber = to;
+    };
+    requestAnimationFrame(tick);
+  }
+
+  /* ───────────── 9. SINCRONIZAR COM O TOTAL ───────────── */
+
+  let total = 0;        // maior total já conhecido (o contador sempre sobe)
+
+  function reveal(newTotal: number) {
+    if (newTotal <= total) return;
+
+    const drawnBefore = Math.min(total, MAX_FLOWERS);
+    const drawnAfter = Math.min(newTotal, MAX_FLOWERS);
+    const toDraw = drawnAfter - drawnBefore;       // 0 quando o buquê já está cheio
+    total = newTotal;
+    animateNumber(newTotal);
+
+    const flying = Math.min(toDraw, MAX_FLYERS);
+    const instant = toDraw - flying;
+    for (let j = 0; j < instant; j++) place(drawnBefore + j, false);
+    for (let j = 0; j < flying; j++) {
+      const idx = drawnBefore + instant + j;
+      setTimeout(() => flyTo(idx), j * 260);
     }
   }
 
-  async function fetchCount() {
+  async function readCount(): Promise<number | null> {
     try {
       const res = await fetch("/api/bouquet");
       const data = await res.json();
-      const total = Number(data.count) ?? 0;
-      // Exibe o número (0 se vier zerado, não "—")
-      if (countEl) countEl.textContent = total.toLocaleString("pt-BR");
-
-      // Desenha o buquê "pronto" até o total atual (sem animação de entrada)
-      const toDraw = Math.min(total, MAX_FLOWERS_DRAWN);
-      for (let i = 0; i < toDraw; i++) addFlowerVisual(false);
+      const n = Number(data.count);
+      return Number.isFinite(n) ? n : null;
     } catch {
-      if (countEl) countEl.textContent = "0";
+      return null;
     }
   }
 
   async function sendFlower() {
-    if (hint) gsap.to(hint, { opacity: 0, duration: 0.3 });
-
-    addFlowerVisual(true);
-
+    reveal(total + 1);                             // feedback imediato (a flor já voa)
     try {
       const res = await fetch("/api/bouquet", { method: "POST" });
       const data = await res.json();
-      const newCount = Number(data.count) || 0;
-      if (countEl) {
-        countEl.textContent = newCount.toLocaleString("pt-BR");
-        gsap.fromTo(
-          countEl,
-          { scale: 1.3, color: "var(--cream)" },
-          { scale: 1, color: "var(--rosa)", duration: 0.5, ease: "power2.out" }
-        );
-      }
+      const n = Number(data.count);
+      if (Number.isFinite(n)) reveal(n);           // alinha com o valor real do servidor (e com envios de outras pessoas)
     } catch {
-      // segue o baile mesmo se a API falhar — a flor já apareceu na tela
+      /* segue mesmo se a API falhar: a flor já apareceu na tela */
     }
   }
 
-  fetchCount();
-  btn?.addEventListener("click", sendFlower);
+  async function poll() {
+    if (document.hidden) return;
+    const n = await readCount();
+    if (n !== null) reveal(n);
+  }
 
-  // Alguém compartilhou/baixou/copiou um cartão de verdade lá em cima
+  async function init() {
+    const n = (await readCount()) ?? 0;
+    const initial = Math.min(n, MAX_FLOWERS);
+    for (let i = 0; i < initial; i++) place(i, false);   // buquê "pronto", sem animação
+    total = n;
+    shownNumber = n;
+    renderNumber(n);
+    if (POLL_MS > 0) setInterval(poll, POLL_MS);
+  }
+
+  // Alguém enviou um cartão de verdade (disparado em MandaFlores.astro)
   window.addEventListener("flor-enviada", sendFlower);
+
+  init();
 </script>
 
 <style>
   .bouquet {
     padding: 7rem 0 8rem;
     text-align: center;
+    overflow: hidden; /* as flores entram voando pelas pontas da seção */
   }
 
   .bouquet__inner {
@@ -194,73 +351,66 @@
 
   .bouquet__count {
     color: rgba(246, 233, 222, 0.5);
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     font-size: 0.7rem;
     letter-spacing: 0.28em;
   }
 
-  .bouquet__count span {
+  .bouquet__count #bouquet-count {
     color: var(--rosa);
     font-weight: 800;
     font-size: 1.1rem;
     font-family: var(--font-display);
     letter-spacing: 0.05em;
-    transition: color 0.3s;
   }
 
-  /* Container principal — clicável */
   .bouquet__stage {
-    position: relative;
-    width: min(88vw, 24rem);
-    aspect-ratio: 1 / 1.05;
+    width: min(94vw, 36rem);
+  }
+
+  /* O <svg> e o que vai dentro são criados pelo script, por isso :global */
+  .bouquet__stage :global(.bouquet__svg) {
     display: block;
-    cursor: pointer;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+</style>
+
+<!-- Classes criadas pelo script (caule/pop das flores) + @keyframes: precisam ser globais -->
+<style is:global>
+  .bq-stem {
+    stroke: #8f0a3d;
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
   }
 
-  /* Vaso SVG: ocupa a metade inferior do stage */
-  .bouquet__vase {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 72%;
-    height: 55%;
+  .bq-grow {
+    animation: bq-grow 0.7s ease-out both;
   }
 
-  /* Flores: ocupam a área inteira (incluindo acima do vaso) */
-  .bouquet__flowers {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
+  .bq-pop {
+    transform-origin: 0 0;
+    animation: bq-pop 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) both;
   }
 
-  :global(.bouquet__flower) {
-    position: absolute;
-    left: var(--x, 50%);
-    bottom: var(--rise, 55%);
-    transform: translateX(-50%) rotate(var(--rot, 0deg));
-    color: var(--rosa);
-    pointer-events: none;
+  @keyframes bq-grow {
+    from { stroke-dashoffset: 1; }
+    to { stroke-dashoffset: 0; }
   }
 
-  :global(.bouquet__flower svg ellipse) {
-    fill: currentColor;
+  @keyframes bq-pop {
+    from { transform: scale(0.3); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
   }
 
-  :global(.bouquet__flower svg circle) {
-    /* miolo já tem fill definido inline */
-  }
-
-  .bouquet__hint {
-    margin-top: 1.75rem;
-    color: rgba(246, 233, 222, 0.3);
-    font-size: 0.65rem;
-    letter-spacing: 0.3em;
-  }
-
-  /* Hover suave no stage */
-  .bouquet__stage:hover .bouquet__vase {
-    filter: brightness(1.1);
-    transition: filter 0.2s ease;
+  @media (prefers-reduced-motion: reduce) {
+    .bq-grow,
+    .bq-pop {
+      animation: none;
+    }
   }
 </style>
