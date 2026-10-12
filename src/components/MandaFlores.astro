@@ -39,7 +39,16 @@ import { FLOWERS } from "../data/flowers.js";
                 aria-pressed={i === 0 ? "true" : "false"}
                 aria-label={f.name}
               >
-                <span class="sr-only">{f.name}</span>
+                <!-- Se você adicionar a imagem da flor em public/flowers/<id>.png, ela carrega aqui -->
+                {f.icon && (
+                  <img
+                    src={f.icon}
+                    alt=""
+                    class="flower-btn__img"
+                    onerror="this.style.display='none'"
+                  />
+                )}
+                <span class="flower-btn__name">{f.name}</span>
               </button>
             ))}
           </div>
@@ -84,7 +93,15 @@ import { FLOWERS } from "../data/flowers.js";
           </div>
 
           <div class="card__footer">
-            <img id="card-qr" class="card__qr" alt="QR code para leomandouflores" width="72" height="72" />
+            <!--
+              PLACEHOLDER QR CODE
+              Para trocar o QR: substitua o src do buildQrSrc() no <script> abaixo
+              (ou troque a tag <img> por uma imagem fixa com src="/seu-qr.png").
+              O QR já vem sem margem branca via API (margin=0).
+            -->
+            <div class="card__qr-wrap">
+              <img id="card-qr" class="card__qr" alt="QR code para leomandouflores" width="72" height="72" />
+            </div>
             <img src="/logo.png" alt="Léo Mandou Flores" class="card__logo" width="150" height="150" />
           </div>
         </div>
@@ -95,14 +112,14 @@ import { FLOWERS } from "../data/flowers.js";
 
 <script>
   const FLOWER_NAMES: Record<string, string> = {
-    rosa: "Rosa",
+    lirio: "Lírio",
     papoula: "Papoula",
-    hibisco: "Hibisco",
     tulipa: "Tulipa",
+    rosa: "Rosa",
     girassol: "Girassol",
   };
 
-  let selectedFlower = "rosa";
+  let selectedFlower = "lirio";
 
   const flowerBtns = document.querySelectorAll<HTMLButtonElement>(".flower-btn");
   const nameInput = document.getElementById("manda-name") as HTMLInputElement;
@@ -291,7 +308,8 @@ import { FLOWERS } from "../data/flowers.js";
   }
 
   .manda__input::placeholder {
-    color: rgba(59, 13, 30, 0.4);
+    color: var(--roxo);
+    opacity: 0.45;
   }
 
   .manda__input:focus-visible {
@@ -305,22 +323,47 @@ import { FLOWERS } from "../data/flowers.js";
   }
 
   .flower-btn {
-    /*
-      PLACEHOLDER: bloco em branco de propósito — você vai desenhar o
-      ícone de cada flor separado e trocar depois. O nome da flor já
-      fica acessível pra leitor de tela (aria-label + .sr-only), só
-      não aparece visualmente ainda.
-    */
-    width: 4.2rem;
-    height: 3.4rem;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-width: 4.8rem;
+    min-height: 2.8rem;
+    padding: 0.65rem 0.9rem;
     border: 2px solid rgba(59, 13, 30, 0.3);
-    background: rgba(59, 13, 30, 0.12);
+    border-radius: 8px;
+    background: rgba(59, 13, 30, 0.1);
+    color: var(--roxo);
+    cursor: pointer;
     transition: all 0.2s var(--ease-out);
+  }
+
+  .flower-btn:hover {
+    background: rgba(59, 13, 30, 0.18);
+    transform: translateY(-2px);
   }
 
   .flower-btn[aria-pressed="true"] {
     background: var(--roxo);
     border-color: var(--roxo);
+    color: var(--cream);
+    box-shadow: 0 4px 12px rgba(59, 13, 30, 0.25);
+  }
+
+  .flower-btn__img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .flower-btn__name {
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    line-height: 1;
   }
 
   .sr-only {
@@ -350,7 +393,8 @@ import { FLOWERS } from "../data/flowers.js";
   }
 
   .manda__textarea::placeholder {
-    color: rgba(59, 13, 30, 0.4);
+    color: var(--roxo);
+    opacity: 0.45;
   }
 
   .manda__textarea:focus-visible {
@@ -462,6 +506,7 @@ import { FLOWERS } from "../data/flowers.js";
   }
 
   .card__quote--empty {
+    color: var(--roxo);
     opacity: 0.45;
     font-weight: 500;
   }
@@ -473,10 +518,23 @@ import { FLOWERS } from "../data/flowers.js";
     margin-top: 1.25rem;
   }
 
+  .card__qr-wrap {
+    /* Remove qualquer borda/fundo branco do QR code */
+    display: block;
+    width: 56px;
+    height: 56px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: transparent;
+    line-height: 0;
+  }
+
   .card__qr {
     display: block;
     width: 56px;
     height: 56px;
+    border: none;
+    background: transparent;
     /* sem fundo branco nem padding: o QR já vem colorido via API */
   }
 

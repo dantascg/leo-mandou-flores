@@ -24,7 +24,7 @@ import { SITE } from "../data/site.js";
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img src={s.icon} alt="" width="22" height="22" />
+            <img src={s.icon} alt="" class="hero__stream-icon" />
           </a>
         ))
       }
@@ -86,8 +86,8 @@ import { SITE } from "../data/site.js";
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 46px;
-    height: 46px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     color: var(--roxo);
     background: rgba(59, 13, 30, 0.08);
@@ -96,9 +96,11 @@ import { SITE } from "../data/site.js";
       transform 0.2s var(--ease-out);
   }
 
-  .hero__stream img {
-    width: 20px;
-    height: 20px;
+  .hero__stream-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
   }
 
   .hero__stream:hover {
@@ -106,7 +108,7 @@ import { SITE } from "../data/site.js";
     transform: translateY(-2px);
   }
 
-  .hero__stream:hover img {
+  .hero__stream:hover .hero__stream-icon {
     filter: brightness(0) invert(1);
   }
 
