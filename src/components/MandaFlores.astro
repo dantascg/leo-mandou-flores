@@ -1,0 +1,489 @@
+---
+import { FLOWERS } from "../data/flowers.js";
+---
+
+<section id="manda-flores" class="manda panel panel--rosa">
+  <div class="wrap">
+    <!-- Título via imagem exportada do CorelDRAW -->
+    <h2 class="manda__title reveal">
+      <img
+        src="/envie-uma-flor.png"
+        alt="Envie uma Flor"
+        class="manda__title-img"
+        draggable="false"
+      />
+    </h2>
+
+    <div class="manda__grid">
+      <div class="manda__config reveal" data-delay="0.1">
+        <div class="manda__field">
+          <p class="eyebrow manda__label">Pra quem é?</p>
+          <input
+            id="manda-name"
+            type="text"
+            class="manda__input"
+            maxlength="40"
+            placeholder="Nome de quem vai receber"
+          />
+        </div>
+
+        <div class="manda__field">
+          <p class="eyebrow manda__label">Escolha a flor</p>
+          <div class="manda__flowers" role="radiogroup" aria-label="Escolha uma flor">
+            {FLOWERS.map((f, i) => (
+              <button
+                type="button"
+                class="flower-btn"
+                data-flower={f.id}
+                data-flower-name={f.name}
+                aria-pressed={i === 0 ? "true" : "false"}
+                aria-label={f.name}
+              >
+                <span class="sr-only">{f.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div class="manda__field">
+          <p class="eyebrow manda__label">Escreva sua mensagem</p>
+          <div class="manda__textarea-wrap">
+            <textarea
+              id="manda-message"
+              class="manda__textarea"
+              maxlength="120"
+              rows="4"
+              placeholder="Uma frase, um trecho de letra, o que quiser..."></textarea>
+            <span class="manda__count" id="manda-count">0/120</span>
+          </div>
+        </div>
+
+        <div class="manda__actions">
+          <button type="button" id="manda-share" class="manda__btn manda__btn--solid eyebrow tap-target" disabled>
+            Compartilhar
+          </button>
+          <button type="button" id="manda-download" class="manda__btn manda__btn--outline eyebrow tap-target" disabled>
+            Baixar
+          </button>
+          <button type="button" id="manda-clipboard" class="manda__btn manda__btn--ghost eyebrow tap-target" disabled>
+            Copiar imagem
+          </button>
+        </div>
+        <p class="manda__feedback eyebrow" id="manda-feedback" aria-live="polite"></p>
+      </div>
+
+      <div class="manda__preview reveal" data-delay="0.2">
+        <p class="eyebrow manda__label">Prévia</p>
+
+        <!-- Card: rosa do projeto + borda roxa arredondada -->
+        <div class="card" id="manda-card">
+          <p class="card__to">para: <span id="card-name">alguém</span></p>
+
+          <div class="card__quote-box">
+            <p class="card__quote" id="card-message">"Escreva sua mensagem ao lado..."</p>
+          </div>
+
+          <div class="card__footer">
+            <img id="card-qr" class="card__qr" alt="QR code para leomandouflores" width="72" height="72" />
+            <img src="/logo.png" alt="Léo Mandou Flores" class="card__logo" width="150" height="150" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const FLOWER_NAMES: Record<string, string> = {
+    rosa: "Rosa",
+    papoula: "Papoula",
+    hibisco: "Hibisco",
+    tulipa: "Tulipa",
+    girassol: "Girassol",
+  };
+
+  let selectedFlower = "rosa";
+
+  const flowerBtns = document.querySelectorAll<HTMLButtonElement>(".flower-btn");
+  const nameInput = document.getElementById("manda-name") as HTMLInputElement;
+  const textarea = document.getElementById("manda-message") as HTMLTextAreaElement;
+  const count = document.getElementById("manda-count") as HTMLSpanElement;
+  const shareBtn = document.getElementById("manda-share") as HTMLButtonElement;
+  const downloadBtn = document.getElementById("manda-download") as HTMLButtonElement;
+  const clipboardBtn = document.getElementById("manda-clipboard") as HTMLButtonElement;
+  const feedback = document.getElementById("manda-feedback") as HTMLParagraphElement;
+  const cardName = document.getElementById("card-name") as HTMLSpanElement;
+  const cardMessage = document.getElementById("card-message") as HTMLParagraphElement;
+  const cardElement = document.getElementById("manda-card") as HTMLElement;
+  const qrImg = document.getElementById("card-qr") as HTMLImageElement;
+
+  // QR aponta pro site de verdade (usa a URL onde o site estiver
+  // rodando — em localhost aponta pra localhost, em produção aponta
+  // pro domínio real, sem precisar trocar nada aqui).
+  function buildQrSrc() {
+    const target = `${window.location.origin}/`;
+    const encoded = encodeURIComponent(target);
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}&bgcolor=CA0053&color=3B0D1E&margin=0`;
+  }
+  if (qrImg) {
+    qrImg.crossOrigin = "anonymous";
+    qrImg.src = buildQrSrc();
+  }
+
+  function updateButtons() {
+    const hasText = textarea.value.trim().length > 0;
+    shareBtn.disabled = !hasText;
+    downloadBtn.disabled = !hasText;
+    clipboardBtn.disabled = !hasText;
+  }
+
+  flowerBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      flowerBtns.forEach((b) => b.setAttribute("aria-pressed", "false"));
+      btn.setAttribute("aria-pressed", "true");
+      selectedFlower = btn.dataset.flower || "rosa";
+    });
+  });
+
+  nameInput?.addEventListener("input", () => {
+    cardName.textContent = nameInput.value.trim() || "alguém";
+  });
+
+  textarea?.addEventListener("input", () => {
+    const value = textarea.value;
+    count.textContent = `${value.length}/120`;
+    cardMessage.textContent = value ? `"${value}"` : '"Escreva sua mensagem ao lado..."';
+    cardMessage.classList.toggle("card__quote--empty", !value);
+    updateButtons();
+  });
+
+  async function renderCardToBlob(): Promise<Blob | null> {
+    const html2canvas = (await import("html2canvas")).default;
+    const canvas = await html2canvas(cardElement, {
+      scale: 2,
+      backgroundColor: "#CA0053",
+      useCORS: true,
+    });
+    return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
+  }
+
+  function notifyFlorEnviada() {
+    window.dispatchEvent(new CustomEvent("flor-enviada", { detail: { flower: selectedFlower } }));
+  }
+
+  shareBtn?.addEventListener("click", async () => {
+    feedback.textContent = "Gerando cartão...";
+    const blob = await renderCardToBlob();
+    if (!blob) {
+      feedback.textContent = "Erro ao gerar imagem.";
+      return;
+    }
+    const file = new File([blob], "cartao-manda-flores.png", { type: "image/png" });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: "Léo Mandou Flores",
+          text: `Recebi uma flor... veja no link: ${window.location.origin}/`,
+          files: [file],
+        });
+        feedback.textContent = "Cartão compartilhado ✓";
+        notifyFlorEnviada();
+      } catch {
+        feedback.textContent = "";
+      }
+    } else {
+      feedback.textContent = "Esse navegador não suporta compartilhar arquivos — usa o Baixar ou o Copiar imagem.";
+    }
+    setTimeout(() => (feedback.textContent = ""), 3000);
+  });
+
+  downloadBtn?.addEventListener("click", async () => {
+    feedback.textContent = "Gerando cartão...";
+    const blob = await renderCardToBlob();
+    if (!blob) {
+      feedback.textContent = "Erro ao gerar imagem.";
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cartao-manda-flores.png";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    feedback.textContent = "Imagem baixada ✓";
+    notifyFlorEnviada();
+    setTimeout(() => (feedback.textContent = ""), 2500);
+  });
+
+  clipboardBtn?.addEventListener("click", async () => {
+    feedback.textContent = "Gerando cartão...";
+    const blob = await renderCardToBlob();
+    if (!blob) {
+      feedback.textContent = "Erro ao gerar imagem.";
+      return;
+    }
+    try {
+      // @ts-ignore — ClipboardItem pode não existir em todo navegador
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+      feedback.textContent = "Imagem copiada — já pode colar ✓";
+    } catch {
+      feedback.textContent = "Esse navegador não deixa copiar imagem — usa o Baixar.";
+    }
+    setTimeout(() => (feedback.textContent = ""), 3000);
+  });
+</script>
+
+<style>
+  .manda {
+    padding: 6rem 0 8rem;
+  }
+
+  /* Título via imagem */
+  .manda__title {
+    margin-bottom: 3.5rem;
+    line-height: 1;
+  }
+
+  .manda__title-img {
+    width: min(80vw, 26rem);
+    height: auto;
+    /* mix-blend-mode: multiply torna o fundo branco do PNG transparente
+       sobre o fundo rosa da seção */
+    mix-blend-mode: multiply;
+    user-select: none;
+  }
+
+  .manda__grid {
+    display: grid;
+    gap: 3rem;
+  }
+
+  @media (min-width: 860px) {
+    .manda__grid {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .manda__field {
+    margin-bottom: 2rem;
+  }
+
+  .manda__label {
+    font-family: var(--font-ui);
+    color: var(--roxo);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .manda__input {
+    width: 100%;
+    padding: 1rem 1.1rem;
+    font-family: var(--font-ui);
+    font-size: 1.05rem;
+    color: rgba(59, 13, 30, 0.7);
+    background: rgba(59, 13, 30, 0.1);
+    border: 1px solid rgba(59, 13, 30, 0.35);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .manda__input::placeholder {
+    color: rgba(59, 13, 30, 0.4);
+  }
+
+  .manda__input:focus-visible {
+    outline: 2px solid var(--roxo);
+  }
+
+  .manda__flowers {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .flower-btn {
+    /*
+      PLACEHOLDER: bloco em branco de propósito — você vai desenhar o
+      ícone de cada flor separado e trocar depois. O nome da flor já
+      fica acessível pra leitor de tela (aria-label + .sr-only), só
+      não aparece visualmente ainda.
+    */
+    width: 4.2rem;
+    height: 3.4rem;
+    border: 2px solid rgba(59, 13, 30, 0.3);
+    background: rgba(59, 13, 30, 0.12);
+    transition: all 0.2s var(--ease-out);
+  }
+
+  .flower-btn[aria-pressed="true"] {
+    background: var(--roxo);
+    border-color: var(--roxo);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .manda__textarea-wrap {
+    position: relative;
+  }
+
+  .manda__textarea {
+    width: 100%;
+    resize: none;
+    padding: 1.25rem;
+    font-family: var(--font-ui);
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: rgba(59, 13, 30, 0.7);
+    background: rgba(59, 13, 30, 0.1);
+    border: 1px solid rgba(59, 13, 30, 0.35);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .manda__textarea::placeholder {
+    color: rgba(59, 13, 30, 0.4);
+  }
+
+  .manda__textarea:focus-visible {
+    outline: 2px solid var(--roxo);
+  }
+
+  .manda__count {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.9rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: rgba(59, 13, 30, 0.45);
+  }
+
+  .manda__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .manda__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.9rem 1.5rem;
+    font-weight: 700;
+    transition: opacity 0.2s, background 0.2s, transform 0.15s;
+  }
+
+  .manda__btn--solid {
+    background: var(--roxo);
+    color: var(--cream);
+  }
+
+  .manda__btn--outline {
+    background: transparent;
+    border: 1px solid var(--roxo);
+    color: var(--roxo);
+  }
+
+  .manda__btn--outline:hover:not(:disabled) {
+    background: rgba(59, 13, 30, 0.1);
+  }
+
+  .manda__btn--ghost {
+    background: transparent;
+    color: rgba(59, 13, 30, 0.65);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .manda__btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .manda__feedback {
+    margin-top: 0.9rem;
+    color: var(--roxo);
+    min-height: 1.2em;
+  }
+
+  /* ── Cartão: mesmo rosa da seção + borda roxa arredondada ── */
+  .card {
+    position: relative;
+    padding: 1.75rem 1.75rem 1.5rem;
+    background: var(--rosa);
+    border: 2.5px solid var(--roxo);
+    border-radius: 18px;
+    max-width: 26rem;
+    /* cresce conforme o conteúdo ao digitar */
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card__to {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--roxo);
+    margin-bottom: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .card__to span {
+    font-weight: 800;
+  }
+
+  .card__quote-box {
+    border: 2px solid var(--roxo);
+    border-radius: 12px;
+    padding: 1.1rem 1.25rem;
+    min-height: 5.5rem;
+    /* sem max-height fixo: cresce com a mensagem */
+    display: flex;
+    align-items: flex-start;
+    transition: min-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card__quote {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(0.95rem, 2.8vw, 1.3rem);
+    line-height: 1.3;
+    color: var(--roxo);
+    word-break: break-word;
+    overflow-wrap: break-word;
+    /* sem clamp: o texto cresce livremente */
+  }
+
+  .card__quote--empty {
+    opacity: 0.45;
+    font-weight: 500;
+  }
+
+  .card__footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 1.25rem;
+  }
+
+  .card__qr {
+    display: block;
+    width: 56px;
+    height: 56px;
+    /* sem fundo branco nem padding: o QR já vem colorido via API */
+  }
+
+  .card__logo {
+    height: 56px;
+    width: auto;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+  }
+</style>

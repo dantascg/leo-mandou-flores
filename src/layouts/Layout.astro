@@ -1,0 +1,83 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Léo Mandou Flores",
+  description = "As flores chegaram. A mensagem, você decide se recebeu.",
+} = Astro.props;
+---
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+
+    <!--
+      ════════════════════════════════════════════════════════
+      CURSOR CUSTOMIZADO
+      Este é o elemento que segue o mouse como cursor.
+
+      OPÇÃO A — Manter SVG animado (atual):
+        Deixe como está. O SVG de pétala abaixo é o cursor.
+
+      OPÇÃO B — Usar PNG ou .cur:
+        1. Coloque seu arquivo em public/cursor/cursor.png
+        2. Substitua o <svg> abaixo por:
+           <img src="/cursor/cursor.png" alt="" width="22" height="22" />
+        3. Em global.css, descomente a linha:
+           cursor: url('/cursor/cursor.cur'), auto;
+        4. Remova a linha "cursor: none" do body.has-petal-cursor
+
+      OPÇÃO C — Desativar completamente:
+        Remova este <div> inteiro e remova initPetalCursor() no <script> abaixo
+      ════════════════════════════════════════════════════════
+    -->
+    <div class="petal-cursor" id="petal-cursor" aria-hidden="true">
+      <!--
+        CURSOR SVG: troque este <svg> pelo conteúdo que quiser
+        (uma <img>, emoji via Canvas, etc.)
+      -->
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!--
+          Florzinha estilizada como cursor.
+          IMPORTANTE: o stroke (contorno) creme nas pétalas é o que
+          garante que a flor apareça tanto em cima do fundo rosa
+          quanto do fundo roxo escuro. Sem esse contorno, pétala
+          rosa em cima de fundo rosa fica invisível — só o miolo
+          aparece. Se for trocar as cores, mantenha um contorno de
+          cor oposta ao preenchimento.
+        -->
+        <g transform="translate(12,12)" stroke="var(--cream)" stroke-width="1.1" stroke-linejoin="round">
+          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(0)" />
+          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(72)" />
+          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(144)" />
+          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(216)" />
+          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(288)" />
+          <circle cx="0" cy="0" r="3" fill="var(--roxo)" stroke="var(--cream)" stroke-width="0.8" />
+        </g>
+      </svg>
+    </div>
+
+    <slot />
+
+    <script>
+      import { initPetalCursor } from "../scripts/petal-cursor";
+      import { initReveals } from "../scripts/reveals";
+      initPetalCursor();
+      initReveals();
+    </script>
+  </body>
+</html>

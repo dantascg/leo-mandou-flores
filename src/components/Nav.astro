@@ -1,0 +1,101 @@
+---
+// ─────────────────────────────────────────────────────────────
+// NAVBAR
+// Links: Álbum, Manda Flores, Buquê (sem Tracklist/Arquivo)
+// CTA "Ouvir" removido — a Hero já é a seção de ouvir
+// ─────────────────────────────────────────────────────────────
+const links = [
+  { href: "#album", label: "Álbum" },
+  { href: "#manda-flores", label: "Manda Flores" },
+  { href: "#buque", label: "Buquê" },
+];
+---
+
+<nav class="nav">
+  <a href="#top" class="nav__brand" aria-label="Léo Mandou Flores — início">
+    <img src="/logo.png" alt="Léo Mandou Flores" class="nav__logo" width="140" height="140" />
+  </a>
+
+  <div class="nav__links">
+    {links.map((l) => (
+      <a href={l.href} class="nav__link eyebrow">{l.label}</a>
+    ))}
+  </div>
+</nav>
+
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1.5rem;
+    background: rgba(202, 0, 83, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(59, 13, 30, 0.25);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+
+  @media (min-width: 768px) {
+    .nav {
+      padding: 0.7rem 2.5rem;
+    }
+  }
+
+  .nav__brand {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav__logo {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .nav__links {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .nav__link {
+    color: rgba(59, 13, 30, 0.65);
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    transition: color 0.25s var(--ease-out);
+  }
+
+  .nav__link:hover {
+    color: var(--roxo);
+  }
+
+  /* Navbar some suavemente na seção do Buquê (fundo roxo) */
+  .nav--hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px);
+  }
+</style>
+
+<script>
+  const nav = document.querySelector(".nav") as HTMLElement;
+  const buqueSection = document.getElementById("buque");
+
+  if (nav && buqueSection) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        nav.classList.toggle("nav--hidden", entry.isIntersecting);
+      },
+      {
+        // Activa quando pelo menos 15% da seção está visível
+        threshold: 0.15,
+      }
+    );
+    observer.observe(buqueSection);
+  }
+</script>
