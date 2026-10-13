@@ -282,42 +282,82 @@
     }
   }
 
-  async function readCount(): Promise<number | null> {
+  interface BouquetData {
+    count?: number;
+    persisted?: boolean;
+    error?: boolean;
+    limited?: boolean;
+  }
+
+  async function fetchBouquet(method = "GET"): Promise<BouquetData | null> {
     try {
-      const res = await fetch("/api/bouquet");
-      const data = await res.json();
-      const n = Number(data.count);
-      return Number.isFinite(n) ? n : null;
+      const res = await fetch("/api/bouquet", { method });
+      if (!res.ok) return null;
+      return await res.json();
     } catch {
       return null;
     }
   }
 
   async function sendFlower() {
-    reveal(total + 1);                             // feedback imediato (a flor já voa)
-    try {
-      const res = await fetch("/api/bouquet", { method: "POST" });
-      const data = await res.json();
-      const n = Number(data.count);
-      if (Number.isFinite(n)) reveal(n);           // alinha com o valor real do servidor (e com envios de outras pessoas)
-    } catch {
-      /* segue mesmo se a API falhar: a flor já apareceu na tela */
+    const isProd = import.meta.env.PROD;
+
+    // Em desenvolvimento local: pode simular se a API não estiver conectada
+    if (!isProd) {
+      try {
+        const data = await fetchBouquet("POST");
+        if (data && Number.isFinite(Number(data.count))) {
+          reveal(Number(data.count));
+        } else {
+          reveal(total + 1);
+        }
+      } catch {
+        reveal(total + 1);
+      }
+      return;
+    }
+
+    // Em produção: só anima e soma se o servidor confirmar a gravação de verdade
+    const data = await fetchBouquet("POST");
+    if (!data || data.error || data.persisted === false) {
+      return;
+    }
+
+    const n = Number(data.count);
+    if (Number.isFinite(n)) {
+      reveal(n);
     }
   }
 
   async function poll() {
     if (document.hidden) return;
-    const n = await readCount();
-    if (n !== null) reveal(n);
+    const data = await fetchBouquet("GET");
+    if (!data) return;
+    const isProd = import.meta.env.PROD;
+    if (isProd && (data.persisted === false || data.error)) return;
+
+    const n = Number(data.count);
+    if (Number.isFinite(n)) reveal(n);
   }
 
   async function init() {
-    const n = (await readCount()) ?? 0;
-    const initial = Math.min(n, MAX_FLOWERS);
-    for (let i = 0; i < initial; i++) place(i, false);   // buquê "pronto", sem animação
-    total = n;
-    shownNumber = n;
-    renderNumber(n);
+    const data = await fetchBouquet("GET");
+    const isProd = import.meta.env.PROD;
+
+    if (data && (!isProd || data.persisted)) {
+      const n = Number(data.count) || 0;
+      const initial = Math.min(n, MAX_FLOWERS);
+      for (let i = 0; i < initial; i++) place(i, false);   // buquê "pronto", sem animação
+      total = n;
+      shownNumber = n;
+      renderNumber(n);
+    } else if (!isProd) {
+      renderNumber(0);
+    } else {
+      // Em produção sem banco: mantém "—" sem erro visível
+      countEl!.textContent = "—";
+    }
+
     if (POLL_MS > 0) setInterval(poll, POLL_MS);
   }
 

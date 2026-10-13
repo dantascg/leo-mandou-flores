@@ -140,7 +140,7 @@ import { FLOWERS } from "../data/flowers.js";
   function buildQrSrc() {
     const target = `${window.location.origin}/`;
     const encoded = encodeURIComponent(target);
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}&bgcolor=CA0053&color=3B0D1E&margin=0`;
+    return `https://api.qrserver.com/v1/create-qr-code/?size=800x800&data=${encoded}&bgcolor=CA0053&color=3B0D1E&margin=0`;
   }
   if (qrImg) {
     qrImg.crossOrigin = "anonymous";
@@ -174,12 +174,40 @@ import { FLOWERS } from "../data/flowers.js";
     updateButtons();
   });
 
+  const EXPORT_WIDTH = 1080;        // largura final do PNG, em pixels
+  const MAX_PIXELS = 16_000_000;    // trava de segurança para celulares fracos
+  const MAX_SCALE = 4;
+
+  function waitForImages(root: HTMLElement) {
+    const imgs = Array.from(root.querySelectorAll("img"));
+    return Promise.all(
+      imgs.map((img) =>
+        img.complete && img.naturalWidth > 0
+          ? Promise.resolve()
+          : new Promise<void>((res) => {
+              img.addEventListener("load", () => res(), { once: true });
+              img.addEventListener("error", () => res(), { once: true });
+            })
+      )
+    );
+  }
+
   async function renderCardToBlob(): Promise<Blob | null> {
     const html2canvas = (await import("html2canvas")).default;
+    if (document.fonts?.ready) await document.fonts.ready;
+    await waitForImages(cardElement);
+
+    const w = cardElement.offsetWidth;
+    const h = cardElement.offsetHeight;
+    const wanted = EXPORT_WIDTH / w;
+    const safe = Math.sqrt(MAX_PIXELS / (w * h));
+    const scale = Math.max(1, Math.min(wanted, safe, MAX_SCALE));
+
     const canvas = await html2canvas(cardElement, {
-      scale: 2,
+      scale,
       backgroundColor: "#CA0053",
       useCORS: true,
+      logging: false,
     });
     return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
   }

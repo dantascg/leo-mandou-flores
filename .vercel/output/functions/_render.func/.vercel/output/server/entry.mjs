@@ -16,7 +16,7 @@ var ASTRO_LOCALS_HEADER = "x-astro-locals";
 var ASTRO_MIDDLEWARE_SECRET_HEADER = "x-astro-middleware-secret";
 //#endregion
 //#region \0virtual:astro-vercel:config
-var middlewareSecret = "29f82146-4c4a-4a9a-ad8e-3e712b5db13e";
+var middlewareSecret = "bbe36692-9201-44f7-978a-f6ff5b76053c";
 //#endregion
 //#region node_modules/astro/dist/core/middleware/noop-middleware.js
 var NOOP_MIDDLEWARE_FN = async (_ctx, next) => {
@@ -176,16 +176,50 @@ var renderers = [];
 			"origin": "project",
 			"_meta": { "trailingSlash": "ignore" }
 		}
+	},
+	{
+		"file": "",
+		"links": [],
+		"scripts": [],
+		"styles": [],
+		"routeData": {
+			"route": "/api/bouquet-health",
+			"isIndex": false,
+			"type": "endpoint",
+			"pattern": "^\\/api\\/bouquet-health\\/?$",
+			"segments": [[{
+				"content": "api",
+				"dynamic": false,
+				"spread": false
+			}], [{
+				"content": "bouquet-health",
+				"dynamic": false,
+				"spread": false
+			}]],
+			"params": [],
+			"component": "src/pages/api/bouquet-health.ts",
+			"pathname": "/api/bouquet-health",
+			"prerender": false,
+			"fallbackRoutes": [],
+			"distURL": [],
+			"origin": "project",
+			"_meta": { "trailingSlash": "ignore" }
+		}
 	}
 ].map(deserializeRouteInfo);
 //#endregion
 //#region \0virtual:astro:pages
 var _page0 = () => import("./chunks/generic_C0OR5Ty4.mjs").then((n) => n.t);
-var _page1 = () => import("./chunks/bouquet_Pjhof063.mjs");
-var pageMap = /* @__PURE__ */ new Map([["node_modules/astro/dist/assets/endpoint/generic.js", _page0], ["src/pages/api/bouquet.ts", _page1]]);
+var _page1 = () => import("./chunks/bouquet_C3NDUb-x.mjs");
+var _page2 = () => import("./chunks/bouquet-health_CZ0ioEf8.mjs");
+var pageMap = /* @__PURE__ */ new Map([
+	["node_modules/astro/dist/assets/endpoint/generic.js", _page0],
+	["src/pages/api/bouquet.ts", _page1],
+	["src/pages/api/bouquet-health.ts", _page2]
+]);
 //#endregion
 //#region \0virtual:astro:manifest
-var _manifest = deserializeManifest({"rootDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/","cacheDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/node_modules/.astro/","outDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/dist/","srcDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/","publicDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/public/","buildClientDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/dist/client/","buildServerDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/.vercel/output/server/","adapterName":"@astrojs/vercel","assetsDir":"_astro","routes":[{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/api/bouquet","isIndex":false,"type":"endpoint","pattern":"^\\/api\\/bouquet\\/?$","segments":[[{"content":"api","dynamic":false,"spread":false}],[{"content":"bouquet","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/api/bouquet.ts","pathname":"/api/bouquet","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":true,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}],"serverLike":true,"middlewareMode":"classic","base":"/","trailingSlash":"ignore","compressHTML":"jsx","componentMetadata":[["C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/pages/index.astro",{"propagation":"none","containsHead":true}]],"renderers":[],"clientDirectives":[["idle","(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value==\"object\"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};\"requestIdleCallback\"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event(\"astro:idle\"));})();"],["load","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event(\"astro:load\"));})();"],["media","(()=>{var n=(a,t)=>{let i=async()=>{await(await a())()};if(t.value){let e=matchMedia(t.value);e.matches?i():e.addEventListener(\"change\",i,{once:!0})}};(self.Astro||(self.Astro={})).media=n;window.dispatchEvent(new Event(\"astro:media\"));})();"],["only","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event(\"astro:only\"));})();"],["visible","(()=>{var a=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value==\"object\"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let l of e)if(l.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=a;window.dispatchEvent(new Event(\"astro:visible\"));})();"]],"entryModules":{"\u0000noop-middleware":"virtual_astro_middleware.mjs","\u0000virtual:astro:server-island-manifest":"chunks/_virtual_astro_server-island-manifest_C1Q2srgE.mjs","\u0000virtual:astro:session-driver":"chunks/_virtual_astro_session-driver_C-PI1Pas.mjs","\u0000virtual:astro:actions/noop-entrypoint":"chunks/noop-entrypoint_Z3zFhrGC.mjs","@astrojs/vercel/entrypoint":"entry.mjs","\u0000virtual:astro:page:src/pages/api/bouquet@_@ts":"chunks/bouquet_Pjhof063.mjs","\u0000virtual:astro:page:node_modules/astro/dist/assets/endpoint/generic@_@js":"chunks/generic_C0OR5Ty4.mjs","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/node_modules/astro/dist/assets/services/sharp.js":"chunks/sharp_BRgvcYZH.mjs","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/Bouquet.astro?astro&type=script&index=0&lang.ts":"_astro/Bouquet.astro_astro_type_script_index_0_lang.C0vNHciT.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/layouts/Layout.astro?astro&type=script&index=0&lang.ts":"_astro/Layout.astro_astro_type_script_index_0_lang.B-uvEFqa.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/MandaFlores.astro?astro&type=script&index=0&lang.ts":"_astro/MandaFlores.astro_astro_type_script_index_0_lang.RumT2rcy.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/Nav.astro?astro&type=script&index=0&lang.ts":"_astro/Nav.astro_astro_type_script_index_0_lang.CtTMYDXM.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/node_modules/html2canvas/dist/html2canvas.js":"_astro/html2canvas.Co_JOgx7.js","astro:scripts/before-hydration.js":""},"inlinedScripts":[["C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/Nav.astro?astro&type=script&index=0&lang.ts","var e=document.querySelector(`.nav`),t=document.getElementById(`buque`);e&&t&&new IntersectionObserver(([t])=>{e.classList.toggle(`nav--hidden`,t.isIntersecting)},{threshold:.15}).observe(t);"]],"assets":["/envie-uma-flor.png","/favicon.ico","/favicon.svg","/hero-flowers.png","/hero-logo.png","/hero-wordmark.png","/logo.png","/streaming/apple-music.png","/streaming/soundcloud.png","/streaming/spotify.png","/streaming/youtube.png","/_astro/Bouquet.astro_astro_type_script_index_0_lang.C0vNHciT.js","/_astro/html2canvas.Co_JOgx7.js","/_astro/Layout.astro_astro_type_script_index_0_lang.B-uvEFqa.js","/_astro/MandaFlores.astro_astro_type_script_index_0_lang.RumT2rcy.js","/_astro/index.BW8vMA8q.css","/index.html"],"buildFormat":"directory","checkOrigin":true,"actionBodySizeLimit":1048576,"serverIslandBodySizeLimit":1048576,"allowedDomains":[],"key":"DRa+dgz6sQ3uWo4ukeTLa+n7HgNN6tjsXXH+9NVw0uA=","image":{},"devToolbar":{"enabled":false,"debugInfoOutput":""},"logLevel":"info","shouldInjectCspMetaTags":false});
+var _manifest = deserializeManifest({"rootDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/","cacheDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/node_modules/.astro/","outDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/dist/","srcDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/","publicDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/public/","buildClientDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/dist/client/","buildServerDir":"file:///C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/.vercel/output/server/","adapterName":"@astrojs/vercel","assetsDir":"_astro","routes":[{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"type":"page","component":"_server-islands.astro","params":["name"],"segments":[[{"content":"_server-islands","dynamic":false,"spread":false}],[{"content":"name","dynamic":true,"spread":false}]],"pattern":"^\\/_server-islands\\/([^/]+?)\\/?$","prerender":false,"isIndex":false,"fallbackRoutes":[],"route":"/_server-islands/[name]","origin":"internal","distURL":[],"_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/_image","component":"node_modules/astro/dist/assets/endpoint/generic.js","params":[],"pathname":"/_image","pattern":"^\\/_image\\/?$","segments":[[{"content":"_image","dynamic":false,"spread":false}]],"type":"endpoint","prerender":false,"fallbackRoutes":[],"distURL":[],"isIndex":false,"origin":"internal","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/api/bouquet","isIndex":false,"type":"endpoint","pattern":"^\\/api\\/bouquet\\/?$","segments":[[{"content":"api","dynamic":false,"spread":false}],[{"content":"bouquet","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/api/bouquet.ts","pathname":"/api/bouquet","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/api/bouquet-health","isIndex":false,"type":"endpoint","pattern":"^\\/api\\/bouquet-health\\/?$","segments":[[{"content":"api","dynamic":false,"spread":false}],[{"content":"bouquet-health","dynamic":false,"spread":false}]],"params":[],"component":"src/pages/api/bouquet-health.ts","pathname":"/api/bouquet-health","prerender":false,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}},{"file":"","links":[],"scripts":[],"styles":[],"routeData":{"route":"/","isIndex":true,"type":"page","pattern":"^\\/$","segments":[],"params":[],"component":"src/pages/index.astro","pathname":"/","prerender":true,"fallbackRoutes":[],"distURL":[],"origin":"project","_meta":{"trailingSlash":"ignore"}}}],"serverLike":true,"middlewareMode":"classic","base":"/","trailingSlash":"ignore","compressHTML":"jsx","componentMetadata":[["C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/pages/index.astro",{"propagation":"none","containsHead":true}]],"renderers":[],"clientDirectives":[["idle","(()=>{var l=(n,t)=>{let i=async()=>{await(await n())()},e=typeof t.value==\"object\"?t.value:void 0,s={timeout:e==null?void 0:e.timeout};\"requestIdleCallback\"in window?window.requestIdleCallback(i,s):setTimeout(i,s.timeout||200)};(self.Astro||(self.Astro={})).idle=l;window.dispatchEvent(new Event(\"astro:idle\"));})();"],["load","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event(\"astro:load\"));})();"],["media","(()=>{var n=(a,t)=>{let i=async()=>{await(await a())()};if(t.value){let e=matchMedia(t.value);e.matches?i():e.addEventListener(\"change\",i,{once:!0})}};(self.Astro||(self.Astro={})).media=n;window.dispatchEvent(new Event(\"astro:media\"));})();"],["only","(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event(\"astro:only\"));})();"],["visible","(()=>{var a=(s,i,o)=>{let r=async()=>{await(await s())()},t=typeof i.value==\"object\"?i.value:void 0,c={rootMargin:t==null?void 0:t.rootMargin},n=new IntersectionObserver(e=>{for(let l of e)if(l.isIntersecting){n.disconnect(),r();break}},c);for(let e of o.children)n.observe(e)};(self.Astro||(self.Astro={})).visible=a;window.dispatchEvent(new Event(\"astro:visible\"));})();"]],"entryModules":{"\u0000noop-middleware":"virtual_astro_middleware.mjs","\u0000virtual:astro:server-island-manifest":"chunks/_virtual_astro_server-island-manifest_C1Q2srgE.mjs","\u0000virtual:astro:session-driver":"chunks/_virtual_astro_session-driver_C-PI1Pas.mjs","\u0000virtual:astro:actions/noop-entrypoint":"chunks/noop-entrypoint_Z3zFhrGC.mjs","@astrojs/vercel/entrypoint":"entry.mjs","\u0000virtual:astro:page:src/pages/api/bouquet-health@_@ts":"chunks/bouquet-health_CZ0ioEf8.mjs","\u0000virtual:astro:page:src/pages/api/bouquet@_@ts":"chunks/bouquet_C3NDUb-x.mjs","\u0000virtual:astro:page:node_modules/astro/dist/assets/endpoint/generic@_@js":"chunks/generic_C0OR5Ty4.mjs","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/node_modules/astro/dist/assets/services/sharp.js":"chunks/sharp_BRgvcYZH.mjs","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/Bouquet.astro?astro&type=script&index=0&lang.ts":"_astro/Bouquet.astro_astro_type_script_index_0_lang.BnOeqYoL.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/layouts/Layout.astro?astro&type=script&index=0&lang.ts":"_astro/Layout.astro_astro_type_script_index_0_lang.B-uvEFqa.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/MandaFlores.astro?astro&type=script&index=0&lang.ts":"_astro/MandaFlores.astro_astro_type_script_index_0_lang.CL9UvAWJ.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/Nav.astro?astro&type=script&index=0&lang.ts":"_astro/Nav.astro_astro_type_script_index_0_lang.CtTMYDXM.js","C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/node_modules/html2canvas/dist/html2canvas.js":"_astro/html2canvas.BjueYRb1.js","astro:scripts/before-hydration.js":""},"inlinedScripts":[["C:/Users/celta/Downloads/leo-mandou-flores-v3/leo-mandou-flores/src/components/Nav.astro?astro&type=script&index=0&lang.ts","var e=document.querySelector(`.nav`),t=document.getElementById(`buque`);e&&t&&new IntersectionObserver(([t])=>{e.classList.toggle(`nav--hidden`,t.isIntersecting)},{threshold:.15}).observe(t);"]],"assets":["/envie-uma-flor.png","/favicon.ico","/favicon.svg","/hero-flowers.png","/hero-logo.png","/hero-wordmark.png","/logo.png","/streaming/apple-music.png","/streaming/soundcloud.png","/streaming/spotify.png","/streaming/youtube.png","/_astro/Bouquet.astro_astro_type_script_index_0_lang.BnOeqYoL.js","/_astro/html2canvas.BjueYRb1.js","/_astro/Layout.astro_astro_type_script_index_0_lang.B-uvEFqa.js","/_astro/MandaFlores.astro_astro_type_script_index_0_lang.CL9UvAWJ.js","/_astro/index.BW8vMA8q.css","/index.html"],"buildFormat":"directory","checkOrigin":true,"actionBodySizeLimit":1048576,"serverIslandBodySizeLimit":1048576,"allowedDomains":[],"key":"emic6ukQty3SlbacpsSEqnWMZ4ROVFIfRSbM95aN0y4=","image":{},"devToolbar":{"enabled":false,"debugInfoOutput":""},"logLevel":"info","shouldInjectCspMetaTags":false});
 var manifestRoutes = _manifest.routes;
 var manifest = Object.assign(_manifest, {
 	renderers,
@@ -398,10 +432,7 @@ function deserializeActionResult(res) {
 			"PROD": true,
 			"SITE": void 0,
 			"SSR": true
-		}, {
-			OS: "Windows_NT",
-			_: "C:/Program Files/nodejs/node.exe"
-		})?.PROD) return {
+		}, { OS: "Windows_NT" })?.PROD) return {
 			error: ActionError.fromJson(json),
 			data: void 0
 		};
@@ -3801,10 +3832,7 @@ function serializeActionResult(res) {
 			"PROD": true,
 			"SITE": void 0,
 			"SSR": true
-		}, {
-			OS: "Windows_NT",
-			_: "C:/Program Files/nodejs/node.exe"
-		})?.DEV) actionResultErrorStack.set(res.error.stack);
+		}, { OS: "Windows_NT" })?.DEV) actionResultErrorStack.set(res.error.stack);
 		let body2;
 		if (res.error instanceof ActionInputError) body2 = {
 			type: res.error.type,
@@ -4661,7 +4689,7 @@ var entrypoint_default = { async fetch(request) {
 	const hasValidMiddlewareSecret = request.headers.get(ASTRO_MIDDLEWARE_SECRET_HEADER) === middlewareSecret;
 	let realPath = void 0;
 	if (hasValidMiddlewareSecret) realPath = request.headers.get(ASTRO_PATH_HEADER);
-	else if (url.searchParams.get("x_astro_path_token") === "29f82146-4c4a-4a9a-ad8e-3e712b5db13e") realPath = url.searchParams.get(ASTRO_PATH_PARAM);
+	else if (url.searchParams.get("x_astro_path_token") === "bbe36692-9201-44f7-978a-f6ff5b76053c") realPath = url.searchParams.get(ASTRO_PATH_PARAM);
 	if (typeof realPath === "string") {
 		const target = new URL(realPath, url);
 		const search = target.search || url.search;
