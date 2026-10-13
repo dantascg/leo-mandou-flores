@@ -289,12 +289,18 @@
     limited?: boolean;
   }
 
+  let hasConfirmedCount = false;
+
   async function fetchBouquet(method = "GET"): Promise<BouquetData | null> {
     try {
       const res = await fetch("/api/bouquet", { method });
-      if (!res.ok) return null;
+      if (!res.ok) {
+        console.error(`[bouquet] Resposta inesperada do servidor (${res.status})`);
+        return null;
+      }
       return await res.json();
-    } catch {
+    } catch (e) {
+      console.error("[bouquet] Falha na comunicação:", (e as Error)?.message || "erro de rede");
       return null;
     }
   }
@@ -337,7 +343,10 @@
     if (isProd && (data.persisted === false || data.error)) return;
 
     const n = Number(data.count);
-    if (Number.isFinite(n)) reveal(n);
+    if (Number.isFinite(n)) {
+      hasConfirmedCount = true;
+      reveal(n);
+    }
   }
 
   async function init() {
@@ -346,16 +355,20 @@
 
     if (data && (!isProd || data.persisted)) {
       const n = Number(data.count) || 0;
+      hasConfirmedCount = true;
       const initial = Math.min(n, MAX_FLOWERS);
       for (let i = 0; i < initial; i++) place(i, false);   // buquê "pronto", sem animação
       total = n;
       shownNumber = n;
       renderNumber(n);
     } else if (!isProd) {
+      hasConfirmedCount = true;
       renderNumber(0);
     } else {
-      // Em produção sem banco: mantém "—" sem erro visível
-      countEl!.textContent = "—";
+      // Em produção se a API falhar ou não persistir: mantém o último valor conhecido ou "—"
+      if (!hasConfirmedCount) {
+        countEl!.textContent = "—";
+      }
     }
 
     if (POLL_MS > 0) setInterval(poll, POLL_MS);

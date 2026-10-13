@@ -6,113 +6,131 @@
 export const prerender = false;
 
 import type { APIRoute } from "astro";
-import { Redis } from "@upstash/redis";
-import { Ratelimit } from "@upstash/ratelimit";
 
 const KEY = "bouquet:count";
-
-// ── Valor inicial do contador. O contador começa em zero e só sobe
-//    com compartilhamentos reais (evento `flor-enviada`). ──
 const BASELINE = 0;
 
-// ── Limites de rate limit (fáceis de ajustar) ──
-const RATE_PER_MINUTE = 5;    // máximo de envios por minuto por IP
-const RATE_PER_DAY    = 20;   // máximo de envios por dia por IP
+const RATE_PER_MINUTE = 5;
+const RATE_PER_DAY = 20;
 
 function clean(v: string | undefined): string | undefined {
   if (!v) return undefined;
-  return v.trim().replace(/^["']+|["']+$/g, "").trim() || undefined;   // remove espaços e aspas coladas por engano
+  return v.trim().replace(/^["']+|["']+$/g, "").trim() || undefined;
 }
 
 function env(name: string): string | undefined {
-  const fromAstro = (import.meta.env as Record<string, string | undefined>)[name];
-  const fromProcess = typeof process !== "undefined" ? process.env[name] : undefined;
-  return clean(fromAstro ?? fromProcess);
+  try {
+    if (typeof process !== "undefined") {
+      if (!process.env?.[name]) {
+        try { process.loadEnvFile?.(); } catch {}
+      }
+      return clean(process.env?.[name]);
+    }
+  } catch {}
+  return undefined;
 }
 
-function getRedis(): Redis | null {
-  const url = env("UPSTASH_REDIS_REST_URL") ?? env("KV_REST_API_URL");
-  const token = env("UPSTASH_REDIS_REST_TOKEN") ?? env("KV_REST_API_TOKEN");
-  if (!url || !token) return null;
-  if (!url.startsWith("https://")) {
-    console.error("[bouquet] A URL REST do Upstash deve começar com https:// (não use rediss:// nem redis://).");
+async function getRedis() {
+  try {
+    const url = env("UPSTASH_REDIS_REST_URL") ?? env("KV_REST_API_URL");
+    const token = env("UPSTASH_REDIS_REST_TOKEN") ?? env("KV_REST_API_TOKEN");
+    if (!url || !token) return null;
+    if (!url.startsWith("https://")) {
+      console.error("[bouquet] A URL REST do Upstash deve começar com https:// (não use rediss:// nem redis://).");
+      return null;
+    }
+    const { Redis } = await import("@upstash/redis");
+    return new Redis({ url, token });
+  } catch (e) {
+    console.error("[bouquet] Falha ao inicializar Redis:", (e as Error)?.message);
     return null;
   }
-  return new Redis({ url, token });
 }
 
-function getRatelimiters(redis: Redis) {
-  const perMinute = new Ratelimit({
-    redis,
-    limiter: Ratelimit.slidingWindow(RATE_PER_MINUTE, "1 m"),
-    prefix: "rl:bouquet:min",
-  });
-  const perDay = new Ratelimit({
-    redis,
-    limiter: Ratelimit.fixedWindow(RATE_PER_DAY, "1 d"),
-    prefix: "rl:bouquet:day",
-  });
-  return { perMinute, perDay };
-}
-
-// ── Valida que a requisição vem do próprio site ──
-function isAllowedOrigin(request: Request): boolean {
-  // Em desenvolvimento (localhost), sempre aceita
-  const origin = request.headers.get("origin") ?? "";
-  const referer = request.headers.get("referer") ?? "";
-
-  if (origin.includes("localhost") || referer.includes("localhost")) return true;
-  if (origin.includes("127.0.0.1") || referer.includes("127.0.0.1")) return true;
-
-  // Em produção: aceita se vier do mesmo domínio
-  const forwardedHost = request.headers.get("x-forwarded-host");
-  const hostHeader = request.headers.get("host");
-  let urlHost = "";
+async function checkRateLimit(redis: any, ip: string): Promise<boolean> {
   try {
-    urlHost = new URL(request.url).host;
-  } catch {}
-  const allowedHosts = new Set([urlHost, forwardedHost, hostHeader].filter(Boolean));
+    const { Ratelimit } = await import("@upstash/ratelimit");
+    const perMinute = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(RATE_PER_MINUTE, "1 m"),
+      prefix: "rl:bouquet:min",
+    });
+    const perDay = new Ratelimit({
+      redis,
+      limiter: Ratelimit.fixedWindow(RATE_PER_DAY, "1 d"),
+      prefix: "rl:bouquet:day",
+    });
 
-  if (origin) {
-    try {
-      const originHost = new URL(origin).host;
-      if (allowedHosts.has(originHost)) return true;
-    } catch {
-      return false;
-    }
-  }
-  if (referer) {
-    try {
-      const refererHost = new URL(referer).host;
-      if (allowedHosts.has(refererHost)) return true;
-    } catch {
-      return false;
-    }
-  }
+    const [minRes, dayRes] = await Promise.all([
+      perMinute.limit(ip),
+      perDay.limit(ip),
+    ]);
 
-  // Sem Origin nem Referer — bloqueia (pode ser chamada direta de API)
-  return false;
+    return minRes.success && dayRes.success;
+  } catch (e) {
+    console.warn("[bouquet] Rate limit indisponível, continuando sem limite:", (e as Error)?.message);
+    return true; // Não derruba a função se o rate limit falhar
+  }
+}
+
+function isAllowedOrigin(request: Request): boolean {
+  try {
+    const origin = request.headers.get("origin") ?? "";
+    const referer = request.headers.get("referer") ?? "";
+
+    if (origin.includes("localhost") || referer.includes("localhost")) return true;
+    if (origin.includes("127.0.0.1") || referer.includes("127.0.0.1")) return true;
+
+    const forwardedHost = request.headers.get("x-forwarded-host");
+    const hostHeader = request.headers.get("host");
+    let urlHost = "";
+    try {
+      urlHost = new URL(request.url).host;
+    } catch {}
+
+    const allowedHosts = new Set([urlHost, forwardedHost, hostHeader].filter(Boolean));
+
+    if (origin) {
+      try {
+        if (allowedHosts.has(new URL(origin).host)) return true;
+      } catch {}
+    }
+    if (referer) {
+      try {
+        if (allowedHosts.has(new URL(referer).host)) return true;
+      } catch {}
+    }
+
+    const secFetchSite = request.headers.get("sec-fetch-site");
+    if (secFetchSite === "same-origin") return true;
+
+    return false;
+  } catch {
+    return true; // Em caso de falha no parse, não bloqueia
+  }
 }
 
 function getClientIP(request: Request): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    request.headers.get("cf-connecting-ip") ??
-    "unknown"
-  );
+  try {
+    return (
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      request.headers.get("cf-connecting-ip") ??
+      "unknown"
+    );
+  } catch {
+    return "unknown";
+  }
 }
 
 export const GET: APIRoute = async () => {
   try {
-    const redis = getRedis();
+    const redis = await getRedis();
 
     if (!redis) {
-      // Banco ainda não configurado (provavelmente rodando local) —
-      // devolve baseline com persisted: false para não quebrar a página.
       return json(
         { count: BASELINE, persisted: false },
-        { headers: { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30" } }
+        { cache: true }
       );
     }
 
@@ -123,60 +141,53 @@ export const GET: APIRoute = async () => {
     }
     return json(
       { count, persisted: true },
-      { headers: { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30" } }
+      { cache: true }
     );
   } catch (e) {
-    console.error("[bouquet] erro:", (e as Error)?.message || "desconhecido");
+    console.error("[bouquet] erro no GET:", (e as Error)?.message || "desconhecido");
     return json({ count: 0, persisted: false, error: true });
   }
 };
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    // ── Verificação de origem: recusa chamadas de outros domínios ──
     if (!isAllowedOrigin(request)) {
-      return new Response(JSON.stringify({ error: "forbidden" }), {
-        status: 403,
-        headers: { "Content-Type": "application/json" },
-      });
+      return json({ error: "forbidden" }, { status: 403 });
     }
 
-    const redis = getRedis();
+    const redis = await getRedis();
 
     if (!redis) {
       return json({ count: BASELINE + 1, persisted: false });
     }
 
-    // ── Rate limit por IP ──
     const ip = getClientIP(request);
-    const { perMinute, perDay } = getRatelimiters(redis);
+    const allowed = await checkRateLimit(redis, ip);
 
-    const [minResult, dayResult] = await Promise.all([
-      perMinute.limit(ip),
-      perDay.limit(ip),
-    ]);
-
-    if (!minResult.success || !dayResult.success) {
-      // Passou do limite: devolve o contador atual sem somar
+    if (!allowed) {
       let count = (await redis.get<number>(KEY)) ?? BASELINE;
       return json({ count, persisted: true, limited: true });
     }
 
-    // ── Tudo certo: soma +1 ──
     const count = await redis.incr(KEY);
     return json({ count, persisted: true });
   } catch (e) {
-    console.error("[bouquet] erro:", (e as Error)?.message || "desconhecido");
+    console.error("[bouquet] erro no POST:", (e as Error)?.message || "desconhecido");
     return json({ count: 0, persisted: false, error: true });
   }
 };
 
-function json(body: unknown, init?: ResponseInit) {
-  const headers = new Headers(init?.headers);
-  headers.set("Content-Type", "application/json");
+function json(body: unknown, options?: { cache?: boolean; status?: number }) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (options?.cache) {
+    headers["Cache-Control"] = "public, s-maxage=10, stale-while-revalidate=30";
+  } else {
+    headers["Cache-Control"] = "no-store";
+  }
   return new Response(JSON.stringify(body), {
-    ...init,
-    status: init?.status ?? 200,
+    status: options?.status ?? 200,
     headers,
   });
 }
