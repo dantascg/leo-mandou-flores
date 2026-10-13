@@ -5,5 +5,4 @@ export const FLOWERS = [
   { id: "papoula", name: "Papoula", icon: "/flowers/papoula.png" },
   { id: "tulipa", name: "Tulipa", icon: "/flowers/tulipa.png" },
   { id: "rosa", name: "Rosa", icon: "/flowers/rosa.png" },
-  { id: "girassol", name: "Girassol", icon: "/flowers/girassol.png" },
 ];
