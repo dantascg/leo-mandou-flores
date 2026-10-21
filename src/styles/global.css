@@ -75,6 +75,19 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ── Escala proporcional em telas de computador ───────────── */
+@media (min-width: 1024px) {
+  html {
+    /* 16px em 1024px → sobe até ~20px em 1920px, de forma suave */
+    font-size: clamp(16px, 0.46vw + 11.3px, 20px);
+  }
+
+  :root {
+    /* Container mais largo para desktops grandes */
+    --container: 1320px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

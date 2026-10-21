@@ -86,6 +86,13 @@ import { SITE } from "../data/site.js";
     mix-blend-mode: multiply;
   }
 
+  @media (min-width: 1024px) {
+    .hero__logo {
+      /* Logo mais imponente em monitores */
+      width: min(70vw, 54rem);
+    }
+  }
+
   .hero__streams {
     display: flex;
     align-items: center;
