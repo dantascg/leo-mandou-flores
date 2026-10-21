@@ -17,7 +17,7 @@ import { FLOWERS } from "../data/flowers.js";
     <div class="manda__grid">
       <div class="manda__config reveal" data-delay="0.1">
         <div class="manda__field">
-          <p class="eyebrow manda__label">Pra quem é?</p>
+          <p class="eyebrow manda__label">Para quem é?</p>
           <input
             id="manda-name"
             type="text"
@@ -102,7 +102,18 @@ import { FLOWERS } from "../data/flowers.js";
             <div class="card__qr-wrap">
               <img id="card-qr" class="card__qr" alt="QR code para leomandouflores" width="72" height="72" />
             </div>
-            <img src="/logo.png" alt="Léo Mandou Flores" class="card__logo" width="150" height="150" />
+            <div class="card__flower-badge" id="card-flower-badge">
+              <img
+                id="card-flower-icon"
+                class="card__flower-icon"
+                src="/flowers/lirio.png"
+                alt=""
+                width="32"
+                height="32"
+              />
+              <span id="card-flower-name" class="card__flower-name">Lírio</span>
+            </div>
+            <img src="/logo.png" alt="LÉO MANDOU FLORES" class="card__logo" width="150" height="150" />
           </div>
         </div>
       </div>
@@ -116,7 +127,6 @@ import { FLOWERS } from "../data/flowers.js";
     papoula: "Papoula",
     tulipa: "Tulipa",
     rosa: "Rosa",
-    girassol: "Girassol",
   };
 
   let selectedFlower = "lirio";
@@ -133,6 +143,8 @@ import { FLOWERS } from "../data/flowers.js";
   const cardMessage = document.getElementById("card-message") as HTMLParagraphElement;
   const cardElement = document.getElementById("manda-card") as HTMLElement;
   const qrImg = document.getElementById("card-qr") as HTMLImageElement;
+  const cardFlowerIcon = document.getElementById("card-flower-icon") as HTMLImageElement;
+  const cardFlowerName = document.getElementById("card-flower-name") as HTMLSpanElement;
 
   // QR aponta pro site de verdade (usa a URL onde o site estiver
   // rodando — em localhost aponta pra localhost, em produção aponta
@@ -158,7 +170,14 @@ import { FLOWERS } from "../data/flowers.js";
     btn.addEventListener("click", () => {
       flowerBtns.forEach((b) => b.setAttribute("aria-pressed", "false"));
       btn.setAttribute("aria-pressed", "true");
-      selectedFlower = btn.dataset.flower || "rosa";
+      const flowerId = btn.dataset.flower || "lirio";
+      selectedFlower = flowerId;
+      if (cardFlowerIcon) {
+        cardFlowerIcon.src = `/flowers/${flowerId}.png`;
+      }
+      if (cardFlowerName) {
+        cardFlowerName.textContent = FLOWER_NAMES[flowerId] || btn.dataset.flowerName || "";
+      }
     });
   });
 
@@ -228,8 +247,8 @@ import { FLOWERS } from "../data/flowers.js";
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
-          title: "Léo Mandou Flores",
-          text: `Recebi uma flor... veja no link: ${window.location.origin}/`,
+          title: "LÉO MANDOU FLORES",
+          text: `Você recebeu uma flor! Veja no link: ${window.location.origin}/`,
           files: [file],
         });
         feedback.textContent = "Cartão compartilhado ✓";
@@ -299,13 +318,6 @@ import { FLOWERS } from "../data/flowers.js";
        sobre o fundo rosa da seção */
     mix-blend-mode: multiply;
     user-select: none;
-  }
-
-  @media (min-width: 1024px) {
-    .manda__title-img {
-      /* Título mais imponente em monitores */
-      width: min(60vw, 34rem);
-    }
   }
 
   .manda__grid {
@@ -551,6 +563,38 @@ import { FLOWERS } from "../data/flowers.js";
     align-items: flex-end;
     justify-content: space-between;
     margin-top: 1.25rem;
+  }
+
+  .card__flower-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: center;
+    flex: 1;
+    min-width: 0;
+    padding: 0 0.5rem;
+    user-select: none;
+  }
+
+  .card__flower-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 2px;
+  }
+
+  .card__flower-name {
+    font-family: var(--font-ui);
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: 0.08em;
+    color: rgba(59, 13, 30, 0.65);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .card__qr-wrap {

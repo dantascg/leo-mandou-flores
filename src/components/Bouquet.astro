@@ -377,6 +377,13 @@
   // Alguém enviou um cartão de verdade (disparado em MandaFlores.astro)
   window.addEventListener("flor-enviada", sendFlower);
 
+  // Ao voltar a ficar visível, faz uma leitura imediata do contador
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+      poll();
+    }
+  });
+
   init();
 </script>
 

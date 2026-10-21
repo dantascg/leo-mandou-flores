@@ -13,13 +13,23 @@ const links = [
 
 <nav class="nav">
   <a href="#top" class="nav__brand" aria-label="Léo Mandou Flores — início">
-    <img src="/logo.png" alt="Léo Mandou Flores" class="nav__logo" width="140" height="140" />
+    <img
+      src="/logo.png"
+      alt="LÉO MANDOU FLORES"
+      class="nav__logo"
+      width="140"
+      height="140"
+    />
   </a>
 
   <div class="nav__links">
-    {links.map((l) => (
-      <a href={l.href} class="nav__link eyebrow">{l.label}</a>
-    ))}
+    {
+      links.map((l) => (
+        <a href={l.href} class="nav__link eyebrow">
+          {l.label}
+        </a>
+      ))
+    }
   </div>
 </nav>
 
@@ -38,7 +48,9 @@ const links = [
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(59, 13, 30, 0.25);
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
   }
 
   @media (min-width: 768px) {
@@ -94,7 +106,7 @@ const links = [
       {
         // Activa quando pelo menos 15% da seção está visível
         threshold: 0.15,
-      }
+      },
     );
     observer.observe(buqueSection);
   }

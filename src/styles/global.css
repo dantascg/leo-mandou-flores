@@ -78,8 +78,8 @@ html {
 /* ── Escala proporcional em telas de computador ───────────── */
 @media (min-width: 1024px) {
   html {
-    /* 16px em 1024px → sobe até ~20px em 1920px, de forma suave */
-    font-size: clamp(16px, 0.46vw + 11.3px, 20px);
+    /* 16 px em 1024 px → ~16,9 px em 1440 px → 18 px em 1920+ px */
+    font-size: clamp(16px, 0.223vw + 13.72px, 18px);
   }
 
   :root {
