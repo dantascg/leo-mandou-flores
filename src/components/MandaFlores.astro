@@ -93,9 +93,9 @@ import { FLOWERS } from "../data/flowers.js";
           </div>
 
           <div class="card__footer">
-            <!-- QR fixo do site; o SVG mantém sua própria quiet zone. -->
+            <!-- PNG rasterizado do qr-site.svg para compatibilidade com html2canvas no Safari. -->
             <div class="card__qr-wrap">
-              <img id="card-qr" class="card__qr" src="/qr-code.svg" alt="QR code para leomandouflores.com" width="72" height="72" />
+              <img id="card-qr" class="card__qr" src="/qr-site.png" alt="QR code para leomandouflores.com" width="56" height="56" />
             </div>
             <div class="card__flower-badge" id="card-flower-badge">
               <img
@@ -103,8 +103,6 @@ import { FLOWERS } from "../data/flowers.js";
                 class="card__flower-icon"
                 src="/flowers/lirio.png"
                 alt=""
-                width="32"
-                height="32"
               />
               <span id="card-flower-name" class="card__flower-name">Lírio</span>
             </div>
@@ -181,18 +179,28 @@ import { FLOWERS } from "../data/flowers.js";
   const MAX_PIXELS = 16_000_000;    // trava de segurança para celulares fracos
   const MAX_SCALE = 4;
 
-  function waitForImages(root: HTMLElement) {
+  async function waitForImages(root: HTMLElement) {
     const imgs = Array.from(root.querySelectorAll("img"));
-    return Promise.all(
-      imgs.map((img) =>
-        img.complete && img.naturalWidth > 0
-          ? Promise.resolve()
-          : new Promise<void>((res) => {
-              img.addEventListener("load", () => res(), { once: true });
-              img.addEventListener("error", () => res(), { once: true });
-            })
-      )
-    );
+    await Promise.all(imgs.map((img) => {
+      if (!img.complete) {
+        return new Promise<void>((resolve) => {
+          const done = () => resolve();
+          img.addEventListener("load", done, { once: true });
+          img.addEventListener("error", done, { once: true });
+        });
+      }
+      return Promise.resolve();
+    }));
+
+    await Promise.all(imgs.map(async (img) => {
+      if (typeof img.decode === "function") {
+        try {
+          await img.decode();
+        } catch {
+          // O html2canvas ainda pode lidar com imagens que o decode rejeita.
+        }
+      }
+    }));
   }
 
   async function renderCardToBlob(): Promise<Blob | null> {
@@ -359,6 +367,7 @@ import { FLOWERS } from "../data/flowers.js";
     display: flex;
     gap: 0.6rem;
     flex-wrap: wrap;
+    --flower-columns-mobile: 4;
   }
 
   .flower-btn {
@@ -407,6 +416,35 @@ import { FLOWERS } from "../data/flowers.js";
     font-weight: 700;
     letter-spacing: 0.04em;
     line-height: 1;
+  }
+
+  @media (max-width: 859px) {
+    .manda__flowers {
+      display: grid;
+      grid-template-columns: repeat(var(--flower-columns-mobile), minmax(0, 1fr));
+      gap: 0.45rem;
+    }
+
+    .flower-btn {
+      min-width: 0;
+      width: 100%;
+      padding: 0.5rem 0.2rem;
+      gap: 0.25rem;
+    }
+
+    .flower-btn__img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .flower-btn__name {
+      font-size: clamp(0.62rem, 2.2vw, 0.75rem);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    /* Para seis flores, altere para 3 e a grade vira 3x2 sem mudar o markup. */
+    /* .manda__flowers { --flower-columns-mobile: 3; } */
   }
 
   .sr-only {
@@ -575,8 +613,10 @@ import { FLOWERS } from "../data/flowers.js";
   }
 
   .card__flower-icon {
-    width: 41px;
-    height: 41px;
+    width: auto;
+    height: auto;
+    max-width: 41px;
+    max-height: 41px;
     object-fit: contain;
     display: block;
     margin: 0 auto 2px;
@@ -597,6 +637,7 @@ import { FLOWERS } from "../data/flowers.js";
 
   .card__qr-wrap {
     /* Remove qualquer borda/fundo branco do QR code */
+    position: relative;
     display: block;
     width: 56px;
     height: 56px;
@@ -611,10 +652,10 @@ import { FLOWERS } from "../data/flowers.js";
     display: block;
     width: 56px;
     height: 56px;
+    aspect-ratio: 1 / 1;
     object-fit: contain;
     border: none;
     background: transparent;
-    image-rendering: pixelated;
   }
 
   .card__logo {
