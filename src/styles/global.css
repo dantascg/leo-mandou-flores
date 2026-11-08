@@ -5,13 +5,13 @@
 /*
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   FONTES
-  Fonte principal atual: Barlow Condensed (Bold/ExtraBold) — impacto visual forte
+  Como trocar: importe a nova fonte no @import abaixo e altere a variável da função.
+  Para Google Fonts, use: @import url("https://fonts.googleapis.com/css2?family=Nome+Da+Fonte&display=swap");
+  Depois troque apenas o valor entre aspas da variável desejada; os componentes já apontam para elas.
   Fonte cursiva atual:   Kapakana (Google Fonts, licença OFL)
   Fonte mono atual:      Space Mono
 
-  Para trocar a fonte principal por qualquer outra:
-  1. Edite o @import abaixo
-  2. Troque o valor de --font-display em :root
+  Fonte sans serif atual preservada: Barlow Condensed.
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
 @import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700&family=Kapakana:wght@300;400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
@@ -27,7 +27,14 @@
   --cream: #f6e9de;
 
   /* ── Fontes ───────────────────────────────────────────────── */
-  --font-display: "Barlow Condensed", Impact, "Arial Narrow", Arial, sans-serif;
+  --font-titulo: "Barlow Condensed", Impact, "Arial Narrow", Arial, sans-serif;
+  --font-corpo: "Barlow Condensed", Impact, "Arial Narrow", Arial, sans-serif;
+  --font-rotulo: "Space Mono", "IBM Plex Mono", monospace;
+  --font-menu: "Space Mono", "IBM Plex Mono", monospace;
+  --font-card: "Barlow Condensed", Impact, "Arial Narrow", Arial, sans-serif;
+
+  /* aliases mantidos para estilos existentes fora dos componentes principais */
+  --font-display: var(--font-titulo);
 
   /*
     FONTE CURSIVA: troque "Kapakana" aqui.
@@ -59,7 +66,7 @@
     - "EB Garamond" (serifada histórica)
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   */
-  --font-ui: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-ui: var(--font-corpo);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --container: 1180px;
@@ -105,7 +112,7 @@ html {
 body {
   background: var(--roxo);
   color: var(--cream);
-  font-family: var(--font-display);
+  font-family: var(--font-corpo);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -164,7 +171,7 @@ button {
 }
 
 .eyebrow {
-  font-family: var(--font-mono);
+  font-family: var(--font-rotulo);
   font-size: 0.68rem;
   letter-spacing: 0.32em;
   text-transform: uppercase;

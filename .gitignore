@@ -5,6 +5,9 @@ dist/
 # Vercel build output (gerado localmente; a Vercel reconstrói a partir do source)
 .vercel/
 
+# backups created during visual adjustments
+_backup_ajustes/
+
 # dependencies
 node_modules/
 
@@ -25,3 +28,5 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+SEGURANCA.md
+RELATORIO_AJUSTES.md

@@ -36,7 +36,7 @@
   const LAYOUT_N = 100;       // "tamanho de referência" do desenho do domo — NÃO mexer: é isso que mantém o buquê
                               // com 75 flores exatamente como foi aprovado (redondo, sem vazios)
   const MAX_FLYERS = 4;       // se chegarem várias de uma vez (polling), só N voam; o resto aparece direto
-  const POLL_MS = 15000;      // de quanto em quanto tempo relê o contador (0 = desliga)
+  const POLL_MS = 3000;       // relê o contador a cada ~3 s (0 = desliga)
   const STROKE = "#3b0d1e";   // contorno das flores (igual ao fundo da seção: --roxo)
   const STEM = "#8f0a3d";     // cor dos caules
 
@@ -293,7 +293,10 @@
 
   async function fetchBouquet(method = "GET"): Promise<BouquetData | null> {
     try {
-      const res = await fetch("/api/bouquet", { method });
+      const res = await fetch("/api/bouquet", {
+        method,
+        cache: method === "GET" ? "no-store" : "default",
+      });
       if (!res.ok) {
         console.error(`[bouquet] Resposta inesperada do servidor (${res.status})`);
         return null;
@@ -371,16 +374,35 @@
       }
     }
 
-    if (POLL_MS > 0) setInterval(poll, POLL_MS);
+    if (POLL_MS > 0 && !document.hidden) startPolling();
   }
 
   // Alguém enviou um cartão de verdade (disparado em MandaFlores.astro)
   window.addEventListener("flor-enviada", sendFlower);
 
-  // Ao voltar a ficar visível, faz uma leitura imediata do contador
+  let pollTimer: number | undefined;
+
+  function stopPolling() {
+    if (pollTimer !== undefined) {
+      window.clearInterval(pollTimer);
+      pollTimer = undefined;
+    }
+  }
+
+  function startPolling() {
+    stopPolling();
+    if (POLL_MS > 0 && !document.hidden) {
+      pollTimer = window.setInterval(poll, POLL_MS);
+    }
+  }
+
+  // Em segundo plano, interrompe o timer; ao voltar, lê imediatamente e reinicia.
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
+    if (document.hidden) {
+      stopPolling();
+    } else {
       poll();
+      startPolling();
     }
   });
 
@@ -401,7 +423,7 @@
   }
 
   .bouquet__title {
-    font-family: var(--font-display);
+    font-family: var(--font-titulo);
     font-weight: 800;
     font-size: clamp(2.8rem, 9vw, 5rem);
     letter-spacing: 0.05em;
@@ -420,7 +442,7 @@
     color: var(--rosa);
     font-weight: 800;
     font-size: 1.1rem;
-    font-family: var(--font-display);
+    font-family: var(--font-rotulo);
     letter-spacing: 0.05em;
   }
 

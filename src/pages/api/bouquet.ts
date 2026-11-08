@@ -139,10 +139,7 @@ export const GET: APIRoute = async () => {
       count = BASELINE;
       await redis.set(KEY, count);
     }
-    return json(
-      { count, persisted: true },
-      { cache: true }
-    );
+    return json({ count, persisted: true });
   } catch (e) {
     console.error("[bouquet] erro no GET:", (e as Error)?.message || "desconhecido");
     return json({ count: 0, persisted: false, error: true });

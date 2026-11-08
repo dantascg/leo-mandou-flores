@@ -12,12 +12,15 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/vercel": "^11.0.10",
+    "@astrojs/vercel": "^11.0.20",
     "@upstash/ratelimit": "^2.2.0",
-    "@upstash/redis": "^1.38.4",
-    "astro": "^7.2.6",
-    "gsap": "^3.15.0",
+    "@upstash/redis": "^1.41.0",
+    "astro": "^7.3.8",
+    "gsap": "^3.15.1",
     "html2canvas": "^1.4.1"
+  },
+  "overrides": {
+    "sharp": "0.35.5"
   },
   "allowScripts": {
     "esbuild": true
