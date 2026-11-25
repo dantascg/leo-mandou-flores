@@ -291,15 +291,18 @@
 
   let hasConfirmedCount = false;
 
-  async function fetchBouquet(method = "GET"): Promise<BouquetData | null> {
+  async function fetchBouquet(method = "GET", turnstileToken?: string): Promise<BouquetData | null> {
     try {
       const res = await fetch("/api/bouquet", {
         method,
         cache: method === "GET" ? "no-store" : "default",
+        headers: method === "POST" ? { "Content-Type": "application/json" } : undefined,
+        body: method === "POST" ? JSON.stringify({ turnstileToken }) : undefined,
       });
       if (!res.ok) {
         console.error(`[bouquet] Resposta inesperada do servidor (${res.status})`);
-        return null;
+        const data = await res.json().catch(() => null);
+        return data && Number.isFinite(Number(data.count)) ? data : null;
       }
       return await res.json();
     } catch (e) {
@@ -308,13 +311,14 @@
     }
   }
 
-  async function sendFlower() {
+  async function sendFlower(event: Event) {
+    const turnstileToken = (event as CustomEvent<{ turnstileToken?: string }>).detail?.turnstileToken;
     const isProd = import.meta.env.PROD;
 
     // Em desenvolvimento local: pode simular se a API não estiver conectada
     if (!isProd) {
       try {
-        const data = await fetchBouquet("POST");
+        const data = await fetchBouquet("POST", turnstileToken);
         if (data && Number.isFinite(Number(data.count))) {
           reveal(Number(data.count));
         } else {
@@ -327,7 +331,7 @@
     }
 
     // Em produção: só anima e soma se o servidor confirmar a gravação de verdade
-    const data = await fetchBouquet("POST");
+    const data = await fetchBouquet("POST", turnstileToken);
     if (!data || data.error || data.persisted === false) {
       return;
     }

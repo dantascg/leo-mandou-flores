@@ -79,6 +79,7 @@ import { FLOWERS } from "../data/flowers.js";
           </button>
         </div>
         <p class="manda__feedback eyebrow" id="manda-feedback" aria-live="polite"></p>
+        <div id="turnstile-container" aria-hidden="true"></div>
       </div>
 
       <div class="manda__preview reveal" data-delay="0.2">
@@ -231,8 +232,46 @@ import { FLOWERS } from "../data/flowers.js";
     return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
   }
 
-  function notifyFlorEnviada() {
-    window.dispatchEvent(new CustomEvent("flor-enviada", { detail: { flower: selectedFlower } }));
+  const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+  let turnstileWidget: number | undefined;
+  let turnstilePromise: Promise<any> | undefined;
+  function loadTurnstile() {
+    if (!TURNSTILE_SITE_KEY) return Promise.resolve(null);
+    if ((window as any).turnstile) return Promise.resolve((window as any).turnstile);
+    if (turnstilePromise) return turnstilePromise;
+    turnstilePromise = new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true; script.defer = true;
+      script.onload = () => resolve((window as any).turnstile || null);
+      script.onerror = () => resolve(null);
+      document.head.appendChild(script);
+    });
+    return turnstilePromise;
+  }
+  async function getTurnstileToken(): Promise<string | undefined> {
+    const api = await loadTurnstile();
+    if (!api) return undefined;
+    return new Promise((resolve) => {
+      const done = (token?: string) => {
+        if (turnstileWidget !== undefined) api.reset(turnstileWidget);
+        resolve(token);
+      };
+      try {
+        if (turnstileWidget === undefined) {
+          turnstileWidget = api.render("#turnstile-container", {
+            sitekey: TURNSTILE_SITE_KEY, size: "invisible",
+            callback: (token: string) => done(token),
+            "error-callback": () => done(), "expired-callback": () => done(),
+          });
+        }
+        api.execute(turnstileWidget);
+      } catch { done(); }
+    });
+  }
+  async function notifyFlorEnviada() {
+    const turnstileToken = await getTurnstileToken();
+    window.dispatchEvent(new CustomEvent("flor-enviada", { detail: { flower: selectedFlower, turnstileToken } }));
   }
 
   shareBtn?.addEventListener("click", async () => {
@@ -252,7 +291,7 @@ import { FLOWERS } from "../data/flowers.js";
           files: [file],
         });
         feedback.textContent = "Cartão compartilhado ✓";
-        notifyFlorEnviada();
+        await notifyFlorEnviada();
       } catch {
         feedback.textContent = "";
       }
@@ -278,7 +317,7 @@ import { FLOWERS } from "../data/flowers.js";
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     feedback.textContent = "Imagem baixada ✓";
-    notifyFlorEnviada();
+    await notifyFlorEnviada();
     setTimeout(() => (feedback.textContent = ""), 2500);
   });
 
