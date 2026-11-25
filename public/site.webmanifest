@@ -1,0 +1,9 @@
+{
+  "name": "Léo Mandou Flores",
+  "short_name": "Léo Mandou Flores",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ca0053",
+  "theme_color": "#ca0053",
+  "icons": [{ "src": "/favicon.ico", "sizes": "32x32", "type": "image/x-icon" }]
+}

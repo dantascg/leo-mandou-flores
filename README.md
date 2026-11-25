@@ -11,6 +11,12 @@ npm install
 npm run dev
 ```
 
+Para iniciar o servidor em segundo plano no ambiente do projeto:
+
+```bash
+astro dev --background
+```
+
 Pra testar no celular sem publicar nada: `npm run dev -- --host`.
 Ele mostra um endereço tipo `http://192.168.x.x:4321` — abre no
 navegador do celular, desde que esteja na mesma wifi do computador.
@@ -65,6 +71,19 @@ vercel
 
 Sem isso configurado, o contador mostra um número de exemplo — o
 resto do site funciona normal.
+
+### Variáveis de ambiente
+
+Copie `.env.example` para `.env` e preencha as credenciais do Upstash.
+`RATE_PER_MINUTE` e `RATE_PER_DAY` controlam os limites por IP.
+Para ativar a proteção invisível contra bots, configure
+`PUBLIC_TURNSTILE_SITE_KEY` (pública) e `TURNSTILE_SECRET_KEY` (secreta)
+na Vercel. O site continua gerando cartões mesmo quando o Turnstile
+falha; nesse caso, o contador não é incrementado.
+
+Depois de alterar as variáveis, faça um novo deploy e teste o envio de
+uma flor no domínio publicado. Consulte `.env.example` para a lista
+completa, incluindo `SITE_HOST` e os nomes alternativos KV da Vercel.
 
 ## Fontes
 

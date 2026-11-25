@@ -1,15 +1,32 @@
 ---
 import "../styles/global.css";
+import { SITE } from "../data/site.js";
 
 interface Props {
   title?: string;
   description?: string;
 }
 
-const {
-  title = "LÉO MANDOU FLORES",
-  description = "As flores chegaram. A mensagem, você decide se recebeu.",
-} = Astro.props;
+const title = Astro.props.title ?? "Léo Mandou Flores — álbum | ouça agora";
+const description = Astro.props.description ?? "Léo Mandou Flores é um álbum para ouvir agora, enviar flores e compartilhar mensagens. Ouça no Spotify, Apple Music, YouTube e SoundCloud.";
+const canonical = new URL(Astro.url.pathname, "https://leomandouflores.com").toString();
+const isPreview = Boolean(import.meta.env.VERCEL_ENV && import.meta.env.VERCEL_ENV !== "production");
+const artist = "Leon Andrade";
+const graph = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebSite", name: "Léo Mandou Flores", alternateName: "Leo Mandou Flores", url: "https://leomandouflores.com/" },
+    {
+      "@type": "MusicAlbum",
+      name: "Léo Mandou Flores",
+      byArtist: { "@type": "Person", name: artist },
+      image: "https://leomandouflores.com/og.png",
+      url: "https://leomandouflores.com/",
+      sameAs: SITE.streaming.filter((stream) => stream.href !== "#").map((stream) => stream.href),
+    },
+    { "@type": "Person", name: artist, sameAs: [SITE.instagramUrl, ...SITE.streaming.filter((stream) => stream.href !== "#").map((stream) => stream.href)] },
+  ],
+};
 ---
 
 <html lang="pt-BR">
@@ -18,66 +35,99 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {isPreview && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#ca0053" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <link rel="icon" href="data:," />
+    <meta property="og:image" content="https://leomandouflores.com/og.png" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="music.album" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="Léo Mandou Flores" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content="https://leomandouflores.com/og.png" />
+    <script type="application/ld+json" set:html={JSON.stringify(graph)}></script>
   </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
-
-    <!--
-      ════════════════════════════════════════════════════════
-      CURSOR CUSTOMIZADO
-      Este é o elemento que segue o mouse como cursor.
-
-      OPÇÃO A — Manter SVG animado (atual):
-        Deixe como está. O SVG de pétala abaixo é o cursor.
-
-      OPÇÃO B — Usar PNG ou .cur:
-        1. Coloque seu arquivo em public/cursor/cursor.png
-        2. Substitua o <svg> abaixo por:
-           <img src="/cursor/cursor.png" alt="" width="22" height="22" />
-        3. Em global.css, descomente a linha:
-           cursor: url('/cursor/cursor.cur'), auto;
-        4. Remova a linha "cursor: none" do body.has-petal-cursor
-
-      OPÇÃO C — Desativar completamente:
-        Remova este <div> inteiro e remova initPetalCursor() no <script> abaixo
-      ════════════════════════════════════════════════════════
-    -->
     <div class="petal-cursor" id="petal-cursor" aria-hidden="true">
-      <!--
-        CURSOR SVG: troque este <svg> pelo conteúdo que quiser
-        (uma <img>, emoji via Canvas, etc.)
-      -->
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!--
-          Florzinha estilizada como cursor.
-          IMPORTANTE: o stroke (contorno) creme nas pétalas é o que
-          garante que a flor apareça tanto em cima do fundo rosa
-          quanto do fundo roxo escuro. Sem esse contorno, pétala
-          rosa em cima de fundo rosa fica invisível — só o miolo
-          aparece. Se for trocar as cores, mantenha um contorno de
-          cor oposta ao preenchimento.
-        -->
         <g transform="translate(12,12)" stroke="var(--cream)" stroke-width="1.1" stroke-linejoin="round">
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(0)" />
+          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" />
           <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(72)" />
           <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(144)" />
           <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(216)" />
           <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(288)" />
-          <circle cx="0" cy="0" r="3" fill="var(--roxo)" stroke="var(--cream)" stroke-width="0.8" />
+          <circle cx="0" cy="0" r="3" fill="var(--roxo)" />
         </g>
       </svg>
     </div>
 
     <slot />
 
+    <footer class="site-footer">
+      <p>Léo Mandou Flores · <button type="button" id="privacy-open" class="privacy-link">privacidade</button></p>
+    </footer>
+    <div id="privacy-modal" class="privacy-modal" role="dialog" aria-modal="true" aria-labelledby="privacy-title" hidden>
+      <div class="privacy-modal__panel" role="document">
+        <button type="button" id="privacy-close" class="privacy-modal__close" aria-label="Fechar privacidade">×</button>
+        <h2 id="privacy-title">Privacidade</h2>
+        <p>Este site não coleta dados pessoais. O nome e a mensagem do cartão ficam só no seu navegador e não são enviados a um servidor.</p>
+        <p>O contador guarda apenas um número total. O IP é usado temporariamente só para limitar abuso.</p>
+        <p>Usamos o Cloudflare Turnstile contra bots. Saiba mais na <a href="https://www.cloudflare.com/turnstile-privacy-policy/" target="_blank" rel="noopener">política de privacidade do Turnstile</a> e na <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">política de privacidade da Cloudflare</a>.</p>
+      </div>
+    </div>
+
     <script>
       import { initPetalCursor } from "../scripts/petal-cursor";
       import { initReveals } from "../scripts/reveals";
       initPetalCursor();
       initReveals();
+
+      const modal = document.getElementById("privacy-modal") as HTMLDivElement;
+      const open = document.getElementById("privacy-open") as HTMLButtonElement;
+      const close = document.getElementById("privacy-close") as HTMLButtonElement;
+      let previous: HTMLElement | null = null;
+      function setModal(value: boolean) {
+        modal.hidden = !value;
+        document.body.classList.toggle("modal-open", value);
+        if (value) { previous = document.activeElement as HTMLElement; close.focus(); }
+        else previous?.focus();
+      }
+      open.addEventListener("click", () => setModal(true));
+      close.addEventListener("click", () => setModal(false));
+      modal.addEventListener("click", (event) => { if (event.target === modal) setModal(false); });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.hidden) setModal(false);
+        if (event.key === "Tab" && !modal.hidden) {
+          const focusable = Array.from(modal.querySelectorAll<HTMLElement>("button, a[href]"));
+          if (focusable.length === 0) return;
+          const first = focusable[0], last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
+      });
     </script>
   </body>
 </html>
+
+<style>
+  .site-footer { background: var(--roxo); color: var(--cream); text-align: center; padding: 1.5rem; font: 0.68rem var(--font-rotulo); opacity: .72; }
+  .privacy-link { color: inherit; background: none; border: 0; padding: .2rem; text-decoration: underline; cursor: pointer; font: inherit; }
+  .privacy-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1.2rem; background: rgba(59,13,30,.7); }
+  .privacy-modal[hidden] { display: none; }
+  .privacy-modal__panel { position: relative; max-width: 34rem; padding: 2rem; color: var(--roxo); background: var(--cream); border: 2px solid var(--roxo); }
+  .privacy-modal__panel h2 { margin-top: 0; font: 800 2rem var(--font-titulo); }
+  .privacy-modal__panel p { max-width: 34rem; line-height: 1.5; }
+  .privacy-modal__panel a { color: var(--rosa-deep); }
+  .privacy-modal__close { position: absolute; top: .4rem; right: .7rem; border: 0; background: none; color: inherit; font-size: 1.8rem; cursor: pointer; }
+  .modal-open { overflow: hidden; }
+</style>

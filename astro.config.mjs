@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import vercel from '@astrojs/vercel';
+import sitemap from '@astrojs/sitemap';
 
 // Site inteiro continua estático (rápido, sem servidor) — só a rota
 // /api/bouquet roda sob demanda (precisa disso pra ler/gravar o
@@ -8,4 +9,6 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   output: 'static',
   adapter: vercel(),
+  site: 'https://leomandouflores.com',
+  integrations: [sitemap()],
 });
