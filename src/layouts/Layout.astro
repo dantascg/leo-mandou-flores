@@ -32,6 +32,7 @@ const graph = {
 <html lang="pt-BR">
   <head>
     <style is:inline>html, body { background: #ca0053; }</style>
+    <script is:inline>history.scrollRestoration = "manual"; window.scrollTo(0, 0);</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
@@ -113,13 +114,13 @@ const graph = {
 </html>
 
 <style>
-  .site-footer { background: var(--roxo); color: var(--cream); text-align: center; padding: 1.5rem; font: 0.68rem var(--font-rotulo); opacity: .72; }
+  .site-footer { background: var(--roxo); color: rgba(246, 233, 222, 0.72); text-align: center; padding: 1.5rem; font: 600 var(--fs-xs) var(--font-main); letter-spacing: .06em; text-transform: uppercase; }
   .privacy-link { color: inherit; background: none; border: 0; padding: .2rem; text-decoration: underline; font: inherit; }
   .privacy-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1.2rem; background: rgba(59,13,30,.7); }
   .privacy-modal[hidden] { display: none; }
   .privacy-modal__panel { position: relative; max-width: 34rem; padding: 2rem; color: var(--roxo); background: var(--cream); border: 2px solid var(--roxo); }
   .privacy-modal__panel h2 { margin-top: 0; font: 800 2rem var(--font-titulo); }
-  .privacy-modal__panel p { max-width: 34rem; line-height: 1.5; }
+  .privacy-modal__panel p { max-width: 34rem; font-family: var(--font-text); line-height: 1.5; }
   .privacy-modal__panel a { color: var(--rosa-deep); }
   .privacy-modal__close { position: absolute; top: .4rem; right: .7rem; border: 0; background: none; color: inherit; font-size: 1.8rem; }
   .modal-open { overflow: hidden; }
