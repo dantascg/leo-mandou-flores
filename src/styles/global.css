@@ -14,7 +14,13 @@
   Fonte sans serif atual preservada: Barlow Condensed.
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
-@import url("https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;1,400&family=Barlow+Condensed:wght@400;600;800&family=Kapakana:wght@300;400&display=swap");
+@import "@fontsource/barlow-condensed/400.css";
+@import "@fontsource/barlow-condensed/600.css";
+@import "@fontsource/barlow-condensed/800.css";
+@import "@fontsource/barlow/400.css";
+@import "@fontsource/barlow/500.css";
+@import "@fontsource/kapakana/300.css";
+@import "@fontsource/kapakana/400.css";
 
 :root {
   /* ── Cores ────────────────────────────────────────────────── */
@@ -284,7 +290,8 @@ button {
   opacity: 0.15;
 }
 
-.reveal { will-change: transform, opacity; }
+.reveal { opacity: 0; transform: translateY(1rem); transition: opacity .7s var(--ease-out), transform .7s var(--ease-out); transition-delay: var(--reveal-delay, 0s); }
+.reveal.is-visible { opacity: 1; transform: none; }
 
 .tap-target {
   min-height: 44px;
@@ -339,6 +346,8 @@ html[data-theme="escuro"] .manda__btn--outline:hover:not(:disabled) { background
 html[data-theme="escuro"] .card,
 html[data-theme="escuro"] .card * { color: var(--roxo); }
 html[data-theme="escuro"] .card { background: var(--rosa); border-color: var(--roxo); }
+html[data-theme="escuro"] .card__flower-icon,
+html[data-theme="escuro"] .card__logo { filter: none; mix-blend-mode: multiply; }
 html[data-theme="escuro"] .bouquet__title { color: var(--cream); }
 html[data-theme="escuro"] .bouquet__count,
 html[data-theme="escuro"] .bouquet__count #bouquet-count { color: var(--cream); }

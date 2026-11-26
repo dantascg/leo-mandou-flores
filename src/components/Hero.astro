@@ -8,15 +8,21 @@ import { SITE } from "../data/site.js";
     <div id="recipient-banner" class="recipient-banner" hidden><span id="recipient-name"></span>, VOCÊ RECEBEU UMA FLOR <a href="#manda-flores">mande uma de volta</a></div>
     <h1 class="hero__logo-wrap">
       <span class="sr-only">Léo Mandou Flores</span>
-      <img
+      <picture>
+        <source type="image/avif" srcset="/generated/hero-logo-480.avif 480w, /generated/hero-logo-768.avif 768w, /generated/hero-logo-1024.avif 1024w" sizes="(max-width: 520px) 88vw, min(88vw, 672px)" />
+        <source type="image/webp" srcset="/generated/hero-logo-480.webp 480w, /generated/hero-logo-768.webp 768w, /generated/hero-logo-1024.webp 1024w" sizes="(max-width: 520px) 88vw, min(88vw, 672px)" />
+        <img
         src="/hero-logo.png"
         alt="Léo Mandou Flores — identidade visual do álbum"
         class="hero__logo"
-        width="960"
-        height="640"
+        width="1024"
+        height="484"
         fetchpriority="high"
+        loading="eager"
+        decoding="async"
         draggable="false"
       />
+      </picture>
     </h1>
 
     <div class="release-countdown" id="release-countdown" aria-label="O álbum sai em 05 de dezembro">
@@ -40,7 +46,7 @@ import { SITE } from "../data/site.js";
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img src={s.icon} alt="" class="hero__stream-icon" />
+            <img src={s.icon} alt="" class="hero__stream-icon" width="24" height="24" loading="lazy" decoding="async" />
           </a>
         ))
       }

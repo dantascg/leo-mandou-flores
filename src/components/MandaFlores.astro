@@ -11,6 +11,10 @@ import { SITE } from "../data/site.js";
         src="/envie-uma-flor.png"
         alt="Envie uma Flor"
         class="manda__title-img"
+        width="1024"
+        height="451"
+        loading="lazy"
+        decoding="async"
         draggable="false"
       />
     </h2>
@@ -52,6 +56,10 @@ import { SITE } from "../data/site.js";
                     src={f.icon}
                     alt=""
                     class="flower-btn__img"
+                    width="28"
+                    height="28"
+                    loading="lazy"
+                    decoding="async"
                     onerror="this.style.display='none'"
                   />
                 )}
@@ -125,6 +133,10 @@ import { SITE } from "../data/site.js";
                 class="card__flower-icon"
                 src="/flowers/lirio.png"
                 alt=""
+                width="41"
+                height="41"
+                loading="lazy"
+                decoding="async"
               />
               <span id="card-flower-name" class="card__flower-name">Lírio</span>
             </div>
@@ -353,7 +365,7 @@ import { SITE } from "../data/site.js";
     const spotify = action?.dataset.spotify || "https://open.spotify.com/";
     if (action) { action.href = presave || spotify; action.textContent = presave ? "FAÇA O PRÉ-SAVE" : "OUÇA O ÁLBUM"; }
     thanksOrigin = document.activeElement as HTMLElement;
-    thanks.hidden = false;
+    thanks.removeAttribute("hidden");
     document.body.classList.add("modal-open");
     shareBtn.disabled = true; downloadBtn.disabled = true; clipboardBtn.disabled = true; storyBtn.disabled = true;
     (document.getElementById("thanks-title") as HTMLElement)?.focus();
@@ -386,7 +398,7 @@ import { SITE } from "../data/site.js";
     if (!blob) { feedback.textContent = "Erro ao gerar imagem."; return; }
     const file = new File([blob], "leo-mandou-flores-story.png", { type: "image/png" });
     if (navigator.canShare?.({ files: [file] })) {
-      try { await navigator.share({ title: "LÉO MANDOU FLORES", text: shareText(), files: [file] }); feedback.textContent = "Story compartilhado"; await notifyFlorEnviada(); showThanks(); } catch {}
+      try { await navigator.share({ title: "LÉO MANDOU FLORES", text: shareText(), files: [file] }); feedback.textContent = "Story compartilhado"; showThanks(); void notifyFlorEnviada(); } catch {}
     } else { await downloadBlob(blob, "leo-mandou-flores-story.png"); feedback.textContent = "Imagem salva — abra o Instagram e poste no Story"; }
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
   });
@@ -408,7 +420,7 @@ import { SITE } from "../data/site.js";
           files: [file],
         });
         feedback.textContent = "Cartão compartilhado";
-        await notifyFlorEnviada(); showThanks(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
+         showThanks(); void notifyFlorEnviada(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
       } catch {
         feedback.textContent = "";
       }
@@ -433,9 +445,22 @@ import { SITE } from "../data/site.js";
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    feedback.textContent = "Imagem baixada";
-    await notifyFlorEnviada(); showThanks(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
+     feedback.textContent = "Imagem baixada";
+     showThanks();
+     void notifyFlorEnviada();
+     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
     setTimeout(() => (feedback.textContent = ""), 2500);
+  });
+
+  // A confirmação é uma resposta imediata à ação; não depende da API de contagem.
+  downloadBtn?.addEventListener("click", () => {
+    window.setTimeout(() => {
+      const modal = document.getElementById("thanks-modal");
+      if (modal instanceof HTMLDivElement) {
+        modal.removeAttribute("hidden");
+        document.body.classList.add("modal-open");
+      }
+    }, 0);
   });
 
   clipboardBtn?.addEventListener("click", async () => {

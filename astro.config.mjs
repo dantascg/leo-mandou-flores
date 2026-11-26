@@ -10,5 +10,6 @@ export default defineConfig({
   output: 'static',
   adapter: vercel(),
   site: 'https://leomandouflores.com',
+  build: { inlineStylesheets: 'always' },
   integrations: [sitemap()],
 });
