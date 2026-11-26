@@ -97,6 +97,7 @@ html[data-theme="escuro"] {
 html {
   background: var(--rosa);
   scroll-behavior: smooth;
+  transition: background-color .25s ease, color .25s ease;
 }
 
 /* ── Escala proporcional em telas de computador ───────────── */
@@ -132,7 +133,11 @@ body {
   font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background-color .25s ease, color .25s ease;
 }
+
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: .25s; }
 
 /*
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -327,6 +332,13 @@ html[data-theme="escuro"] .manda__feedback,
 html[data-theme="escuro"] .manda__thanks { color: var(--cream); }
 html[data-theme="escuro"] .flower-btn { color: var(--cream); border-color: rgba(246,233,222,.4); background: rgba(246,233,222,.08); }
 html[data-theme="escuro"] .flower-btn[aria-checked="true"] { background: var(--rosa); border-color: var(--rosa); color: var(--cream); }
+html[data-theme="escuro"] .flower-btn:not([aria-checked="true"]) .flower-btn__img { filter: brightness(0) saturate(100%) invert(91%) sepia(13%) saturate(240%) hue-rotate(324deg) brightness(104%); }
+html[data-theme="escuro"] .manda__btn--solid { background: var(--cream); color: var(--roxo); }
+html[data-theme="escuro"] .manda__btn--outline { border-color: var(--cream); color: var(--cream); background: transparent; }
+html[data-theme="escuro"] .manda__btn--outline:hover:not(:disabled) { background: rgba(246,233,222,.12); }
+html[data-theme="escuro"] .card,
+html[data-theme="escuro"] .card * { color: var(--roxo); }
+html[data-theme="escuro"] .card { background: var(--rosa); border-color: var(--roxo); }
 html[data-theme="escuro"] .bouquet__title { color: var(--cream); }
 html[data-theme="escuro"] .bouquet__count,
 html[data-theme="escuro"] .bouquet__count #bouquet-count { color: var(--cream); }

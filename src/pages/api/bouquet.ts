@@ -180,9 +180,8 @@ async function notifyNtfy(count: number, store: Redis) {
     await fetch(`${base}/${encodeURIComponent(topic)}`, {
       method: "POST",
       headers: {
-        "Title": milestone ? `🎉 ${count} flores!` : "🌸 Nova flor enviada",
+        "Title": milestone ? `${count} flores!` : "Nova flor enviada",
         "Priority": milestone ? "3" : "2",
-        "Tags": "cherry_blossom",
         ...(env("NTFY_TOKEN") ? { Authorization: `Bearer ${env("NTFY_TOKEN")}` } : {}),
       },
       body: milestone ? `${count} flores` : `Total: ${count} flores`,

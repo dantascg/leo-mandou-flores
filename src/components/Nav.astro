@@ -76,6 +76,7 @@ const links = [
 
   .nav__links {
     display: flex;
+    align-items: center;
     gap: 2rem;
   }
 
@@ -93,20 +94,36 @@ const links = [
     color: var(--roxo);
   }
 
-  .theme-toggle { color: var(--roxo); padding: .5rem; }
-  .theme-icon { width: 18px; height: 18px; display: block; }
-  .theme-icon--sun { display: none; }
-  :global(html[data-theme="escuro"]) .nav { background: rgba(59, 13, 30, .92); border-color: rgba(246,233,222,.22); }
+  .theme-toggle { position: relative; color: var(--roxo); padding: .5rem; }
+  .theme-toggle:focus { outline: none; }
+  .theme-toggle:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
+  .theme-icon { width: 18px; height: 18px; display: block; transition: opacity .25s ease, transform .25s var(--ease-out); }
+  .theme-icon--moon { opacity: 1; transform: rotate(0); }
+  .theme-icon--sun { position: absolute; inset: .5rem; opacity: 0; transform: rotate(-35deg) scale(.7); }
+  :global(html[data-theme="escuro"]) .nav { background: var(--roxo); border-color: rgba(246,233,222,.22); }
   :global(html[data-theme="escuro"]) .nav__link,
   :global(html[data-theme="escuro"]) .theme-toggle { color: var(--cream); }
-  :global(html[data-theme="escuro"]) .theme-icon--moon { display: none; }
-  :global(html[data-theme="escuro"]) .theme-icon--sun { display: block; }
+  :global(html[data-theme="escuro"]) .theme-icon--moon { opacity: 0; transform: rotate(35deg) scale(.7); }
+  :global(html[data-theme="escuro"]) .theme-icon--sun { opacity: 1; transform: rotate(0) scale(1); }
 
   /* Navbar some suavemente na seção do Buquê (fundo roxo) */
   .nav--hidden {
     opacity: 0;
     pointer-events: none;
     transform: translateY(-8px);
+  }
+
+  @media (max-width: 1100px) {
+    .nav { padding-inline: 1rem; }
+    .nav__links { gap: clamp(.55rem, 1.7vw, 1.1rem); }
+    .nav__link { letter-spacing: .04em; }
+  }
+
+  @media (max-width: 560px) {
+    .nav__logo { height: 38px; }
+    .nav__links { gap: .25rem; }
+    .nav__link { font-size: .64rem; letter-spacing: .02em; }
+    .theme-toggle { padding: .35rem; }
   }
 </style>
 
@@ -140,8 +157,15 @@ const links = [
   updateThemeButton();
   themeToggle?.addEventListener("click", () => {
     const dark = document.documentElement.dataset.theme !== "escuro";
-    document.documentElement.dataset.theme = dark ? "escuro" : "padrao";
-    try { localStorage.setItem("leo-theme", dark ? "escuro" : "padrao"); } catch {}
-    updateThemeButton();
+    const apply = () => {
+      document.documentElement.dataset.theme = dark ? "escuro" : "padrao";
+      try { localStorage.setItem("leo-theme", dark ? "escuro" : "padrao"); } catch {}
+      updateThemeButton();
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("startViewTransition" in document)) {
+      apply();
+    } else {
+      (document as Document & { startViewTransition?: (callback: () => void) => unknown }).startViewTransition?.(apply);
+    }
   });
 </script>
