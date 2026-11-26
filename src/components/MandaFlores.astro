@@ -100,11 +100,6 @@ import { SITE } from "../data/site.js";
         </div>
         <p class="manda__feedback eyebrow" id="manda-feedback" aria-live="polite"></p>
         <p class="sr-only" id="card-description" aria-live="polite">Cartão para alguém, flor Lírio, mensagem: escreva sua mensagem ao lado.</p>
-        <div class="manda__thanks" id="manda-thanks" hidden tabindex="-1" aria-live="polite">
-          <strong>FLOR ENVIADA 🌸</strong>
-          <a id="thanks-action" data-presave={SITE.presave} data-spotify={SITE.streaming[0].href} class="manda__btn manda__btn--solid eyebrow" href={SITE.streaming[0].href} target="_blank" rel="noopener">OUÇA O ÁLBUM</a>
-          <button type="button" id="manda-again" class="manda__btn manda__btn--ghost eyebrow">enviar outra flor</button>
-        </div>
         <div id="turnstile-container" aria-hidden="true"></div>
       </div>
 
@@ -141,6 +136,17 @@ import { SITE } from "../data/site.js";
   </div>
 </section>
 
+<div id="thanks-modal" class="thanks-modal" role="dialog" aria-modal="true" aria-labelledby="thanks-title" hidden>
+  <div class="thanks-modal__panel" role="document">
+    <button type="button" id="thanks-close" class="thanks-modal__close" aria-label="Fechar confirmação">×</button>
+    <img class="thanks-modal__flower" src="/cursor/flower.png" alt="" width="40" height="40" />
+    <h2 id="thanks-title" tabindex="-1">FLOR ENVIADA</h2>
+    <p>Obrigado por espalhar flores.</p>
+    <a id="thanks-action" data-presave={SITE.presave} data-spotify={SITE.streaming[0].href} class="manda__btn manda__btn--solid eyebrow" href={SITE.streaming[0].href} target="_blank" rel="noopener">OUÇA O ÁLBUM</a>
+    <button type="button" id="manda-again" class="manda__btn manda__btn--ghost eyebrow">ENVIAR OUTRA FLOR</button>
+  </div>
+</div>
+
 <script>
   const FLOWER_NAMES: Record<string, string> = {
     lirio: "Lírio",
@@ -168,8 +174,11 @@ import { SITE } from "../data/site.js";
   const cardFlowerIcon = document.getElementById("card-flower-icon") as HTMLImageElement;
   const cardFlowerName = document.getElementById("card-flower-name") as HTMLSpanElement;
   const cardDescription = document.getElementById("card-description") as HTMLParagraphElement;
-  const thanks = document.getElementById("manda-thanks") as HTMLDivElement;
+  const thanks = document.getElementById("thanks-modal") as HTMLDivElement;
+  const thanksPanel = thanks?.querySelector(".thanks-modal__panel") as HTMLDivElement;
+  const thanksClose = document.getElementById("thanks-close") as HTMLButtonElement;
   const again = document.getElementById("manda-again") as HTMLButtonElement;
+  let thanksOrigin: HTMLElement | null = null;
 
   function updateButtons() {
     const hasText = textarea.value.trim().length > 0;
@@ -289,7 +298,7 @@ import { SITE } from "../data/site.js";
   function shareText() {
     const name = nameInput.value.trim().slice(0, 40);
     const link = `${window.location.origin}/${name ? `?para=${encodeURIComponent(name)}` : ""}`;
-    return `${name ? `${name}, você recebeu uma flor 🌸` : "Você recebeu uma flor 🌸"} ${link}`;
+    return `${name ? `${name}, você recebeu uma flor` : "Você recebeu uma flor"} ${link}`;
   }
 
   async function downloadBlob(blob: Blob, filename: string) {
@@ -343,10 +352,33 @@ import { SITE } from "../data/site.js";
     const presave = action?.dataset.presave || "";
     const spotify = action?.dataset.spotify || "https://open.spotify.com/";
     if (action) { action.href = presave || spotify; action.textContent = presave ? "FAÇA O PRÉ-SAVE" : "OUÇA O ÁLBUM"; }
-    thanks.hidden = false; shareBtn.disabled = true; downloadBtn.disabled = true; clipboardBtn.disabled = true; storyBtn.disabled = true;
-    thanks.focus();
+    thanksOrigin = document.activeElement as HTMLElement;
+    thanks.hidden = false;
+    document.body.classList.add("modal-open");
+    shareBtn.disabled = true; downloadBtn.disabled = true; clipboardBtn.disabled = true; storyBtn.disabled = true;
+    (document.getElementById("thanks-title") as HTMLElement)?.focus();
   }
-  again?.addEventListener("click", () => { thanks.hidden = true; nameInput.value = ""; textarea.value = ""; cardName.textContent = "alguÃ©m"; cardMessage.textContent = '"Escreva sua mensagem ao lado..."'; count.textContent = "0/120"; document.getElementById("manda-name")?.focus(); });
+  function closeThanks(reset = false) {
+    thanks.hidden = true;
+    document.body.classList.remove("modal-open");
+    if (reset) {
+      nameInput.value = ""; textarea.value = ""; cardName.textContent = "alguém"; cardMessage.textContent = '"Escreva sua mensagem ao lado..."';
+      cardMessage.classList.add("card__quote--empty"); count.textContent = "0/120"; updateButtons(); nameInput.focus();
+    } else { thanksOrigin?.focus(); }
+  }
+  again?.addEventListener("click", () => closeThanks(true));
+  thanksClose?.addEventListener("click", () => closeThanks());
+  thanks?.addEventListener("click", (event) => { if (event.target === thanks) closeThanks(); });
+  document.addEventListener("keydown", (event) => {
+    if (thanks.hidden) return;
+    if (event.key === "Escape") { event.preventDefault(); closeThanks(); return; }
+    if (event.key !== "Tab") return;
+    const focusable = Array.from(thanksPanel.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"));
+    if (!focusable.length) return;
+    const first = focusable[0]; const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
 
   storyBtn?.addEventListener("click", async () => {
     feedback.textContent = "Gerando Story...";
@@ -354,7 +386,7 @@ import { SITE } from "../data/site.js";
     if (!blob) { feedback.textContent = "Erro ao gerar imagem."; return; }
     const file = new File([blob], "leo-mandou-flores-story.png", { type: "image/png" });
     if (navigator.canShare?.({ files: [file] })) {
-      try { await navigator.share({ title: "LÉO MANDOU FLORES", text: shareText(), files: [file] }); feedback.textContent = "Story compartilhado ✓"; await notifyFlorEnviada(); showThanks(); } catch {}
+      try { await navigator.share({ title: "LÉO MANDOU FLORES", text: shareText(), files: [file] }); feedback.textContent = "Story compartilhado"; await notifyFlorEnviada(); showThanks(); } catch {}
     } else { await downloadBlob(blob, "leo-mandou-flores-story.png"); feedback.textContent = "Imagem salva — abra o Instagram e poste no Story"; }
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
   });
@@ -375,7 +407,7 @@ import { SITE } from "../data/site.js";
           text: shareText(),
           files: [file],
         });
-        feedback.textContent = "Cartão compartilhado ✓";
+        feedback.textContent = "Cartão compartilhado";
         await notifyFlorEnviada(); showThanks(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
       } catch {
         feedback.textContent = "";
@@ -401,7 +433,7 @@ import { SITE } from "../data/site.js";
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    feedback.textContent = "Imagem baixada ✓";
+    feedback.textContent = "Imagem baixada";
     await notifyFlorEnviada(); showThanks(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
     setTimeout(() => (feedback.textContent = ""), 2500);
   });
@@ -416,7 +448,7 @@ import { SITE } from "../data/site.js";
     try {
       // @ts-ignore — ClipboardItem pode não existir em todo navegador
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      feedback.textContent = "Imagem copiada — já pode colar ✓";
+      feedback.textContent = "Imagem copiada — já pode colar";
     } catch {
       feedback.textContent = "Esse navegador não deixa copiar imagem — usa o Baixar.";
     }
@@ -680,8 +712,19 @@ import { SITE } from "../data/site.js";
     min-height: 1.2em;
   }
 
-  .manda__thanks { display: grid; gap: .75rem; margin-top: 1.25rem; justify-items: start; color: var(--roxo); }
-  .manda__thanks strong { font: 800 1.5rem var(--font-titulo); }
+  .thanks-modal { position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; padding: 1rem; background: rgba(27, 5, 14, .72); animation: thanks-fade .2s ease both; }
+  .thanks-modal[hidden] { display: none; }
+  .thanks-modal__panel { position: relative; display: grid; justify-items: center; gap: .8rem; width: min(100%, 23rem); padding: 2.25rem 1.5rem 1.5rem; color: var(--roxo); background: var(--rosa); border: 2px solid var(--roxo); border-radius: 18px; text-align: center; animation: thanks-pop .25s var(--ease-out) both; }
+  .thanks-modal__flower { width: 40px; height: 40px; object-fit: contain; }
+  .thanks-modal__panel h2 { font: 800 2rem/.95 var(--font-titulo); }
+  .thanks-modal__panel p { font-family: var(--font-text); }
+  .thanks-modal__panel .manda__btn { width: 100%; justify-content: center; }
+  .thanks-modal__close { position: absolute; top: .45rem; right: .65rem; padding: .25rem .45rem; color: inherit; font-size: 1.6rem; line-height: 1; }
+  :global(html[data-theme="escuro"]) .thanks-modal__panel { color: var(--cream); background: var(--roxo-soft); border-color: var(--cream); }
+  :global(html[data-theme="escuro"]) .thanks-modal__panel .manda__btn--solid { color: var(--roxo); background: var(--cream); }
+  :global(html[data-theme="escuro"]) .thanks-modal__panel .manda__btn--ghost { color: var(--cream); }
+  @keyframes thanks-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes thanks-pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 
   @media (max-width: 480px) {
     .manda__actions {
