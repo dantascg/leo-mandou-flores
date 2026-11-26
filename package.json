@@ -27,8 +27,5 @@
   },
   "allowScripts": {
     "esbuild": true
-  },
-  "devDependencies": {
-    "playwright": "^1.65.1"
   }
 }
