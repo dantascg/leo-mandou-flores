@@ -61,19 +61,6 @@ const graph = {
   </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
-    <div class="petal-cursor" id="petal-cursor" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g transform="translate(12,12)" stroke="var(--cream)" stroke-width="1.1" stroke-linejoin="round">
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(72)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(144)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(216)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(288)" />
-          <circle cx="0" cy="0" r="3" fill="var(--roxo)" />
-        </g>
-      </svg>
-    </div>
-
     <slot />
 
     <footer class="site-footer">
@@ -124,13 +111,13 @@ const graph = {
 
 <style>
   .site-footer { background: var(--roxo); color: var(--cream); text-align: center; padding: 1.5rem; font: 0.68rem var(--font-rotulo); opacity: .72; }
-  .privacy-link { color: inherit; background: none; border: 0; padding: .2rem; text-decoration: underline; cursor: pointer; font: inherit; }
+  .privacy-link { color: inherit; background: none; border: 0; padding: .2rem; text-decoration: underline; font: inherit; }
   .privacy-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1.2rem; background: rgba(59,13,30,.7); }
   .privacy-modal[hidden] { display: none; }
   .privacy-modal__panel { position: relative; max-width: 34rem; padding: 2rem; color: var(--roxo); background: var(--cream); border: 2px solid var(--roxo); }
   .privacy-modal__panel h2 { margin-top: 0; font: 800 2rem var(--font-titulo); }
   .privacy-modal__panel p { max-width: 34rem; line-height: 1.5; }
   .privacy-modal__panel a { color: var(--rosa-deep); }
-  .privacy-modal__close { position: absolute; top: .4rem; right: .7rem; border: 0; background: none; color: inherit; font-size: 1.8rem; cursor: pointer; }
+  .privacy-modal__close { position: absolute; top: .4rem; right: .7rem; border: 0; background: none; color: inherit; font-size: 1.8rem; }
   .modal-open { overflow: hidden; }
 </style>

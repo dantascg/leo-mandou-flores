@@ -135,10 +135,16 @@ body {
      remova o <div id="petal-cursor"> e o script initPetalCursor()
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
-body.has-petal-cursor {
-  /* CURSOR: descomente a linha abaixo e ajuste o caminho quando tiver o arquivo */
-  /* cursor: url('/cursor/cursor.cur'), auto; */
-  cursor: none; /* remove enquanto usa o cursor SVG animado */
+html, body {
+  cursor: url('/cursor/flower.cur'), url('/cursor/flower.png') 16 16, auto;
+}
+
+a, button, [role="button"], label, summary, .tap-target, [onclick] {
+  cursor: url('/cursor/flower-hover.cur'), url('/cursor/flower-hover.png') 16 16, pointer;
+}
+
+input, textarea {
+  cursor: text;
 }
 
 a {
@@ -153,7 +159,6 @@ img {
 
 button {
   font-family: inherit;
-  cursor: pointer;
   background: none;
   border: none;
   color: inherit;
@@ -210,20 +215,6 @@ button {
   2. Remova body.has-petal-cursor { cursor: none }
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
-.petal-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  /* TAMANHO CURSOR: troque 22px pelo tamanho do seu PNG */
-  width: 22px;
-  height: 22px;
-  z-index: 80;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
 .petal-trail {
   position: fixed;
   top: 0;
@@ -235,11 +226,15 @@ button {
   border: 1px solid var(--roxo);
   z-index: 79;
   pointer-events: none;
-  transform: translate(-50%, -50%) rotate(45deg);
+  animation: petal-fall 0.7s ease-out forwards;
 }
 
-@media (hover: none) {
-  .petal-cursor,
+@keyframes petal-fall {
+  from { opacity: .85; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+  to { opacity: 0; transform: translate(calc(-50% + var(--drift)), calc(-50% + 22px)) rotate(190deg) scale(.25); }
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
   .petal-trail {
     display: none;
   }
