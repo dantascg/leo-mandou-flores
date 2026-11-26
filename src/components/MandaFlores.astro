@@ -285,6 +285,8 @@ import { SITE } from "../data/site.js";
       useCORS: true,
       logging: false,
       onclone: (clonedDocument) => {
+        // A arte exportada sempre usa a paleta original, mesmo quando a prévia está escura.
+        clonedDocument.documentElement.dataset.theme = "padrao";
         const clonedCard = clonedDocument.getElementById("manda-card");
         if (clonedCard instanceof HTMLElement) {
           // O preview mantém borda/cantos; só a cópia exportada vira um retângulo cheio.
@@ -300,7 +302,15 @@ import { SITE } from "../data/site.js";
     const html2canvas = (await import("html2canvas")).default;
     if (document.fonts?.ready) await document.fonts.ready;
     await waitForImages(cardElement);
-    const cardCanvas = await html2canvas(cardElement, { scale: 2, backgroundColor: "#ca0053", useCORS: true, logging: false });
+    const cardCanvas = await html2canvas(cardElement, {
+      scale: 2,
+      backgroundColor: "#ca0053",
+      useCORS: true,
+      logging: false,
+      onclone: (clonedDocument) => {
+        clonedDocument.documentElement.dataset.theme = "padrao";
+      },
+    });
     const story = document.createElement("canvas"); story.width = 1080; story.height = 1920;
     const ctx = story.getContext("2d"); if (!ctx) return null;
     ctx.fillStyle = "#ca0053"; ctx.fillRect(0, 0, story.width, story.height);
