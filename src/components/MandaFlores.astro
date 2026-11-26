@@ -481,6 +481,9 @@ import { SITE } from "../data/site.js";
     gap: 3rem;
   }
 
+  .manda__config,
+  .manda__preview { min-width: 0; }
+
   @media (min-width: 860px) {
     .manda__grid {
       grid-template-columns: 1fr 1fr;
@@ -652,7 +655,7 @@ import { SITE } from "../data/site.js";
   .manda__actions {
     display: flex;
     gap: 0.75rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
 
   .manda__btn {
