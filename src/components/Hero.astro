@@ -5,7 +5,7 @@ import { SITE } from "../data/site.js";
 <section id="top" class="hero panel panel--rosa">
   <!-- Logo única: hero-logo.png (flores + wordmark em um só arquivo) -->
   <div class="hero__center">
-    <h1 class="hero__logo-wrap reveal">
+    <h1 class="hero__logo-wrap">
       <span class="sr-only">Léo Mandou Flores</span>
       <img
         src="/hero-logo.png"
@@ -18,7 +18,7 @@ import { SITE } from "../data/site.js";
       />
     </h1>
 
-    <div class="hero__streams reveal" data-delay="0.15">
+    <div class="hero__streams">
       {
         SITE.streaming.map((s) => (
           <a
@@ -105,7 +105,7 @@ import { SITE } from "../data/site.js";
     height: 52px;
     border-radius: 50%;
     color: var(--roxo);
-    background: rgba(59, 13, 30, 0.08);
+    background: rgba(59, 13, 30, 0.12);
     transition:
       background 0.25s var(--ease-out),
       transform 0.2s var(--ease-out);
@@ -119,7 +119,7 @@ import { SITE } from "../data/site.js";
   }
 
   .hero__stream:hover {
-    background: var(--roxo);
+    background: rgba(59, 13, 30, 0.2);
     transform: translateY(-2px);
   }
 

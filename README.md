@@ -29,7 +29,7 @@ nenhuma linha de código:
 
 | O que é | Onde colocar | Enquanto não existe |
 |---|---|---|
-| Logo/wordmark completo do Hero | `public/hero-wordmark.png` | Mostra um placeholder de texto (Arimo + Kapakana) |
+| Logo/wordmark completo do Hero | `public/hero-wordmark.png` | Mostra um placeholder de texto (Barlow Condensed + Kapakana) |
 | Flores de fundo do Hero (line-art) | `public/hero-flowers.png` | Fundo rosa liso, sem quebrar nada |
 | Logo pequena da nav/cartão | `public/logo.png` | Já tem uma versão provisória aplicada |
 | Ícone Spotify | `public/streaming/spotify.svg` | Círculo com "S" |
@@ -87,7 +87,8 @@ completa, incluindo `SITE_HOST` e os nomes alternativos KV da Vercel.
 
 ## Fontes
 
-- Principal: Helvetica (sistema) + **Arimo** (reforço gratuito).
+- Principal: **Barlow Condensed**.
+- Texto corrido longo: **Barlow**.
 - Cursiva/script: **Kapakana** (Google Fonts, licença OFL — grátis).
 
 Tudo documentado com comentários em `src/styles/global.css`.

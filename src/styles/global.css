@@ -9,12 +9,12 @@
   Para Google Fonts, use: @import url("https://fonts.googleapis.com/css2?family=Nome+Da+Fonte&display=swap");
   Depois troque apenas o valor entre aspas da variável desejada; os componentes já apontam para elas.
   Fonte cursiva atual:   Kapakana (Google Fonts, licença OFL)
-  Fonte mono atual:      Space Mono
+  Fonte de texto longo:  Barlow
 
   Fonte sans serif atual preservada: Barlow Condensed.
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,700&family=Kapakana:wght@300;400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,400;0,500;1,400&family=Barlow+Condensed:wght@400;600;800&family=Kapakana:wght@300;400&display=swap");
 
 :root {
   /* ── Cores ────────────────────────────────────────────────── */
@@ -27,26 +27,28 @@
   --cream: #f6e9de;
 
   /* ── Fontes ───────────────────────────────────────────────── */
-  --font-titulo: "Barlow Condensed", Impact, "Arial Narrow", Arial, sans-serif;
-  --font-corpo: "Barlow Condensed", Impact, "Arial Narrow", Arial, sans-serif;
-  --font-rotulo: "Space Mono", "IBM Plex Mono", monospace;
-  --font-menu: "Space Mono", "IBM Plex Mono", monospace;
-  --font-card: "Barlow Condensed", Impact, "Arial Narrow", Arial, sans-serif;
+  --font-main: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --font-text: "Barlow", Arial, sans-serif;
+  --font-script: "Kapakana", cursive;
+
+  --font-titulo: var(--font-main);
+  --font-corpo: var(--font-main);
+  --font-rotulo: var(--font-main);
+  --font-menu: var(--font-main);
+  --font-card: var(--font-main);
 
   /* aliases mantidos para estilos existentes fora dos componentes principais */
-  --font-display: var(--font-titulo);
+  --font-display: var(--font-main);
 
   /*
     FONTE CURSIVA: troque "Kapakana" aqui.
     Exemplos: "Pacifico", "Dancing Script", "Great Vibes"
   */
-  --font-script: "Kapakana", cursive;
 
   /*
-    FONTE MONO: troque "Space Mono" aqui.
-    Exemplos: "IBM Plex Mono", "JetBrains Mono", "Courier New"
+    Os rótulos, menus e contadores usam a fonte principal em caixa alta.
   */
-  --font-mono: "Space Mono", "IBM Plex Mono", monospace;
+  --font-mono: var(--font-main);
 
   /*
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -56,17 +58,20 @@
     1. Adicione o @import da nova fonte no topo deste arquivo
        Exemplo: @import url("https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap");
     2. Troque o valor abaixo pelo nome da nova fonte:
-       --font-ui: "Playfair Display", serif;
+       --font-ui: "Barlow Condensed", sans-serif;
 
     Fontes sugeridas para um look mais artesanal/editorial:
-    - "Playfair Display" (serifada elegante)
-    - "Cormorant Garamond" (serifada refinada)
-    - "Libre Baskerville" (serifada clássica)
-    - "DM Serif Display" (serifada moderna)
-    - "EB Garamond" (serifada histórica)
+    O texto corrido longo usa Barlow, da mesma família tipográfica.
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   */
-  --font-ui: var(--font-corpo);
+  --font-ui: var(--font-main);
+
+  --fs-xs: clamp(0.68rem, 0.12vw + 0.64rem, 0.72rem);
+  --fs-sm: clamp(0.78rem, 0.18vw + 0.73rem, 0.86rem);
+  --fs-md: clamp(0.95rem, 0.28vw + 0.88rem, 1.08rem);
+  --fs-lg: clamp(1.2rem, 0.6vw + 1rem, 1.55rem);
+  --fs-xl: clamp(2rem, 3.2vw + 1rem, 4.6rem);
+  --fs-display: clamp(3rem, 8vw, 8rem);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --container: 1180px;
@@ -79,6 +84,7 @@
 }
 
 html {
+  background: var(--rosa);
   scroll-behavior: smooth;
 }
 
@@ -110,9 +116,9 @@ html {
 }
 
 body {
-  background: var(--roxo);
+  background: var(--rosa);
   color: var(--cream);
-  font-family: var(--font-corpo);
+  font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -134,10 +140,16 @@ body {
      remova o <div id="petal-cursor"> e o script initPetalCursor()
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
-body.has-petal-cursor {
-  /* CURSOR: descomente a linha abaixo e ajuste o caminho quando tiver o arquivo */
-  /* cursor: url('/cursor/cursor.cur'), auto; */
-  cursor: none; /* remove enquanto usa o cursor SVG animado */
+html, body {
+  cursor: url('/cursor/flower.cur'), url('/cursor/flower.png') 12 12, auto;
+}
+
+a, button, [role="button"], label, summary, .tap-target, [onclick] {
+  cursor: url('/cursor/flower-hover.cur'), url('/cursor/flower-hover.png') 12 12, pointer;
+}
+
+input, textarea {
+  cursor: text;
 }
 
 a {
@@ -152,7 +164,6 @@ img {
 
 button {
   font-family: inherit;
-  cursor: pointer;
   background: none;
   border: none;
   color: inherit;
@@ -172,7 +183,7 @@ button {
 
 .eyebrow {
   font-family: var(--font-rotulo);
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.32em;
   text-transform: uppercase;
 }
@@ -209,20 +220,6 @@ button {
   2. Remova body.has-petal-cursor { cursor: none }
   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 */
-.petal-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  /* TAMANHO CURSOR: troque 22px pelo tamanho do seu PNG */
-  width: 22px;
-  height: 22px;
-  z-index: 80;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
 .petal-trail {
   position: fixed;
   top: 0;
@@ -234,11 +231,15 @@ button {
   border: 1px solid var(--roxo);
   z-index: 79;
   pointer-events: none;
-  transform: translate(-50%, -50%) rotate(45deg);
+  animation: petal-fall 0.7s ease-out forwards;
 }
 
-@media (hover: none) {
-  .petal-cursor,
+@keyframes petal-fall {
+  from { opacity: .85; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+  to { opacity: 0; transform: translate(calc(-50% + var(--drift)), calc(-50% + 22px)) rotate(190deg) scale(.25); }
+}
+
+@media (hover: none), (prefers-reduced-motion: reduce) {
   .petal-trail {
     display: none;
   }
@@ -267,10 +268,7 @@ button {
   opacity: 0.15;
 }
 
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-}
+.reveal { will-change: transform, opacity; }
 
 .tap-target {
   min-height: 44px;
@@ -301,19 +299,3 @@ button {
   outline-color: var(--roxo);
 }
 
-.album-description {
-  padding: 1.5rem 1.5rem 2rem;
-  text-align: center;
-  font: 0.75rem/1.5 var(--font-rotulo);
-}
-
-.album-description p {
-  max-width: 52rem;
-  margin: 0 auto;
-  opacity: .78;
-}
-
-.album-description a {
-  color: inherit;
-  text-decoration: underline;
-}

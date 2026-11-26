@@ -7,7 +7,7 @@ interface Props {
   description?: string;
 }
 
-const title = Astro.props.title ?? "Léo Mandou Flores — álbum | ouça agora";
+const title = Astro.props.title ?? "LÉO MANDOU FLORES | Ouça agora";
 const description = Astro.props.description ?? "Léo Mandou Flores é um álbum para ouvir agora, enviar flores e compartilhar mensagens. Ouça no Spotify, Apple Music, YouTube e SoundCloud.";
 const canonical = new URL(Astro.url.pathname, "https://leomandouflores.com").toString();
 const isPreview = Boolean(import.meta.env.VERCEL_ENV && import.meta.env.VERCEL_ENV !== "production");
@@ -20,7 +20,7 @@ const graph = {
       "@type": "MusicAlbum",
       name: "Léo Mandou Flores",
       byArtist: { "@type": "Person", name: artist },
-      image: "https://leomandouflores.com/og.png",
+      image: "https://leomandouflores.com/og-cover.jpg",
       url: "https://leomandouflores.com/",
       sameAs: SITE.streaming.filter((stream) => stream.href !== "#").map((stream) => stream.href),
     },
@@ -31,6 +31,8 @@ const graph = {
 
 <html lang="pt-BR">
   <head>
+    <style is:inline>html, body { background: #ca0053; }</style>
+    <script is:inline>history.scrollRestoration = "manual"; window.scrollTo(0, 0);</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
@@ -38,39 +40,31 @@ const graph = {
     <link rel="canonical" href={canonical} />
     {isPreview && <meta name="robots" content="noindex" />}
     <meta name="theme-color" content="#ca0053" />
+    <meta name="color-scheme" content="light" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="https://leomandouflores.com/og.png" />
+    <meta property="og:image" content="https://leomandouflores.com/og-cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:alt" content="Capa do álbum Léo Mandou Flores" />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="music.album" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:site_name" content="Léo Mandou Flores" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="https://leomandouflores.com/og.png" />
+    <meta name="twitter:image" content="https://leomandouflores.com/og-cover.jpg" />
     <script type="application/ld+json" set:html={JSON.stringify(graph)}></script>
   </head>
   <body>
     <div class="grain" aria-hidden="true"></div>
-    <div class="petal-cursor" id="petal-cursor" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <g transform="translate(12,12)" stroke="var(--cream)" stroke-width="1.1" stroke-linejoin="round">
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(72)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(144)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(216)" />
-          <ellipse cx="0" cy="-6" rx="3" ry="5.5" fill="var(--rosa)" transform="rotate(288)" />
-          <circle cx="0" cy="0" r="3" fill="var(--roxo)" />
-        </g>
-      </svg>
-    </div>
-
     <slot />
 
     <footer class="site-footer">
@@ -120,14 +114,14 @@ const graph = {
 </html>
 
 <style>
-  .site-footer { background: var(--roxo); color: var(--cream); text-align: center; padding: 1.5rem; font: 0.68rem var(--font-rotulo); opacity: .72; }
-  .privacy-link { color: inherit; background: none; border: 0; padding: .2rem; text-decoration: underline; cursor: pointer; font: inherit; }
+  .site-footer { background: var(--roxo); color: rgba(246, 233, 222, 0.72); text-align: center; padding: 1.5rem; font: 600 var(--fs-xs) var(--font-main); letter-spacing: .06em; text-transform: uppercase; }
+  .privacy-link { color: inherit; background: none; border: 0; padding: .2rem; text-decoration: underline; font: inherit; }
   .privacy-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1.2rem; background: rgba(59,13,30,.7); }
   .privacy-modal[hidden] { display: none; }
   .privacy-modal__panel { position: relative; max-width: 34rem; padding: 2rem; color: var(--roxo); background: var(--cream); border: 2px solid var(--roxo); }
   .privacy-modal__panel h2 { margin-top: 0; font: 800 2rem var(--font-titulo); }
-  .privacy-modal__panel p { max-width: 34rem; line-height: 1.5; }
+  .privacy-modal__panel p { max-width: 34rem; font-family: var(--font-text); line-height: 1.5; }
   .privacy-modal__panel a { color: var(--rosa-deep); }
-  .privacy-modal__close { position: absolute; top: .4rem; right: .7rem; border: 0; background: none; color: inherit; font-size: 1.8rem; cursor: pointer; }
+  .privacy-modal__close { position: absolute; top: .4rem; right: .7rem; border: 0; background: none; color: inherit; font-size: 1.8rem; }
   .modal-open { overflow: hidden; }
 </style>
