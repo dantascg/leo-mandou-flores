@@ -176,13 +176,21 @@ import { SITE } from "../data/site.js";
     display: block;
   }
 
-  .hero__stream:hover {
-    background: rgba(59, 13, 30, 0.2);
-    transform: translateY(-2px);
+  .hero__stream:focus-visible,
+  .hero__presave:focus-visible {
+    outline: 3px solid currentColor;
+    outline-offset: 3px;
   }
 
-  .hero__stream:hover .hero__stream-icon {
-    filter: brightness(0) invert(1);
+  @media (hover: hover) and (pointer: fine) {
+    .hero__stream:hover {
+      background: rgba(59, 13, 30, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .hero__stream:hover .hero__stream-icon {
+      filter: brightness(0) invert(1);
+    }
   }
 
   /* Seta de scroll — fixa no rodapé do Hero */

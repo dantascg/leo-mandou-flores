@@ -343,7 +343,9 @@ html[data-theme="escuro"] .flower-btn[aria-checked="true"] .flower-btn__img { fi
 html[data-theme="escuro"] .flower-btn:not([aria-checked="true"]) .flower-btn__img { filter: brightness(0) saturate(100%) invert(91%) sepia(13%) saturate(240%) hue-rotate(324deg) brightness(104%); }
 html[data-theme="escuro"] .manda__btn--solid { background: var(--cream); color: var(--roxo); }
 html[data-theme="escuro"] .manda__btn--outline { border-color: var(--cream); color: var(--cream); background: transparent; }
-html[data-theme="escuro"] .manda__btn--outline:hover:not(:disabled) { background: rgba(246,233,222,.12); }
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme="escuro"] .manda__btn--outline:hover:not(:disabled) { background: rgba(246,233,222,.12); }
+}
 html[data-theme="escuro"] .card,
 html[data-theme="escuro"] .card * { color: var(--roxo); }
 html[data-theme="escuro"] .card { background: var(--roxo); border-color: var(--cream); }
