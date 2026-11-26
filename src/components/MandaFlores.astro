@@ -7,7 +7,10 @@ import { SITE } from "../data/site.js";
   <div class="wrap">
     <!-- Título via imagem exportada do CorelDRAW -->
     <h2 class="manda__title reveal">
-      <img
+      <picture>
+        <source type="image/avif" srcset="/generated/envie-uma-flor-480.avif 480w, /generated/envie-uma-flor-768.avif 768w" sizes="min(80vw, 416px)" />
+        <source type="image/webp" srcset="/generated/envie-uma-flor-480.webp 480w, /generated/envie-uma-flor-768.webp 768w" sizes="min(80vw, 416px)" />
+        <img
         src="/envie-uma-flor.png"
         alt="Envie uma Flor"
         class="manda__title-img"
@@ -17,6 +20,7 @@ import { SITE } from "../data/site.js";
         decoding="async"
         draggable="false"
       />
+      </picture>
     </h2>
 
     <div class="manda__grid">
@@ -53,7 +57,7 @@ import { SITE } from "../data/site.js";
                 <!-- Se você adicionar a imagem da flor em public/flowers/<id>.png, ela carrega aqui -->
                 {f.icon && (
                   <img
-                    src={f.icon}
+                    src={`/generated/flowers/${f.id}-64.webp`}
                     alt=""
                     class="flower-btn__img"
                     width="28"
@@ -125,13 +129,13 @@ import { SITE } from "../data/site.js";
           <div class="card__footer">
             <!-- PNG rasterizado do qr-site.svg para compatibilidade com html2canvas no Safari. -->
             <div class="card__qr-wrap">
-              <img id="card-qr" class="card__qr" src="/qr-site.png" alt="QR code para leomandouflores.com" width="56" height="56" />
+              <img id="card-qr" class="card__qr" src="/generated/qr-site-112.webp" alt="QR code para leomandouflores.com" width="56" height="56" loading="lazy" decoding="async" />
             </div>
             <div class="card__flower-badge" id="card-flower-badge">
               <img
                 id="card-flower-icon"
                 class="card__flower-icon"
-                src="/flowers/lirio.png"
+                src="/generated/flowers/lirio-128.webp"
                 alt=""
                 width="41"
                 height="41"
@@ -140,7 +144,7 @@ import { SITE } from "../data/site.js";
               />
               <span id="card-flower-name" class="card__flower-name">Lírio</span>
             </div>
-            <img src="/logo.png" alt="LÉO MANDOU FLORES" class="card__logo" width="150" height="150" />
+            <img src="/generated/logo-192.webp" alt="LÉO MANDOU FLORES" class="card__logo" width="150" height="150" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>
@@ -209,7 +213,7 @@ import { SITE } from "../data/site.js";
       const flowerId = FLOWER_IDS.has(requestedFlowerId) ? requestedFlowerId : "lirio";
       selectedFlower = flowerId;
       if (cardFlowerIcon) {
-        cardFlowerIcon.src = `/flowers/${flowerId}.png`;
+        cardFlowerIcon.src = `/generated/flowers/${flowerId}-128.webp`;
       }
       if (cardFlowerName) {
         cardFlowerName.textContent = FLOWER_NAMES[flowerId] || btn.dataset.flowerName || "";

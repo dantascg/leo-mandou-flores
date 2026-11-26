@@ -46,7 +46,7 @@ import { SITE } from "../data/site.js";
             target="_blank"
             rel="noopener noreferrer"
           >
-            <img src={s.icon} alt="" class="hero__stream-icon" width="24" height="24" loading="lazy" decoding="async" />
+            <img src={s.icon.replace("/streaming/", "/generated/streaming/").replace(".png", "-48.webp")} alt="" class="hero__stream-icon" width="24" height="24" loading="lazy" decoding="async" />
           </a>
         ))
       }
