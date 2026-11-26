@@ -96,16 +96,21 @@ const links = [
     color: var(--roxo);
   }
 
-  .theme-toggle { position: relative; color: var(--roxo); padding: .5rem; }
+  .theme-toggle {
+    position: relative;
+    color: var(--roxo);
+    padding: 0;
+    line-height: 0;
+  }
   .theme-toggle:focus-visible { outline: 1px solid var(--cream); outline-offset: 4px; }
-  .theme-icon { width: 18px; height: 18px; display: block; transition: opacity .25s ease, transform .25s var(--ease-out); }
-  .theme-icon--moon { opacity: 1; transform: rotate(0); }
-  .theme-icon--sun { position: absolute; inset: .5rem; opacity: 0; transform: rotate(-35deg) scale(.7); }
+  .theme-icon { position: absolute; top: 50%; left: 0; width: 18px; height: 18px; display: block; transition: opacity .25s ease, transform .25s var(--ease-out); }
+  .theme-icon--moon { opacity: 1; transform: translateY(-50%) rotate(0); }
+  .theme-icon--sun { opacity: 0; transform: translateY(-50%) rotate(-35deg) scale(.7); }
   :global(html[data-theme="escuro"]) .nav { background: var(--roxo); border-color: rgba(246,233,222,.22); }
   :global(html[data-theme="escuro"]) .nav__link,
   :global(html[data-theme="escuro"]) .theme-toggle { color: var(--cream); }
-  :global(html[data-theme="escuro"]) .theme-icon--moon { opacity: 0; transform: rotate(35deg) scale(.7); }
-  :global(html[data-theme="escuro"]) .theme-icon--sun { opacity: 1; transform: rotate(0) scale(1); }
+  :global(html[data-theme="escuro"]) .theme-icon--moon { opacity: 0; transform: translateY(-50%) rotate(35deg) scale(.7); }
+  :global(html[data-theme="escuro"]) .theme-icon--sun { opacity: 1; transform: translateY(-50%) rotate(0) scale(1); }
 
   /* Navbar some suavemente na seção do Buquê (fundo roxo) */
   .nav--hidden {
@@ -129,7 +134,7 @@ const links = [
     .nav__logo { height: 38px; }
     .nav__links { gap: .15rem; }
     .nav__link { font-size: .64rem; letter-spacing: .02em; }
-    .theme-toggle { padding: .35rem; }
+    .theme-toggle { padding: 0; }
   }
 </style>
 
