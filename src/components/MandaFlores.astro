@@ -602,6 +602,10 @@ import { SITE } from "../data/site.js";
     filter: brightness(0) invert(1);
   }
 
+  :global(html[data-theme="escuro"]) .flower-btn[aria-checked="true"] .flower-btn__img {
+    filter: none;
+  }
+
   .flower-btn__img {
     width: 28px;
     height: 28px;

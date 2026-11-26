@@ -339,6 +339,7 @@ html[data-theme="escuro"] .manda__feedback,
 html[data-theme="escuro"] .manda__thanks { color: var(--cream); }
 html[data-theme="escuro"] .flower-btn { color: var(--cream); border-color: rgba(246,233,222,.4); background: rgba(246,233,222,.08); }
 html[data-theme="escuro"] .flower-btn[aria-checked="true"] { background: var(--cream); border-color: var(--cream); color: var(--roxo); }
+html[data-theme="escuro"] .flower-btn[aria-checked="true"] .flower-btn__img { filter: none; }
 html[data-theme="escuro"] .flower-btn:not([aria-checked="true"]) .flower-btn__img { filter: brightness(0) saturate(100%) invert(91%) sepia(13%) saturate(240%) hue-rotate(324deg) brightness(104%); }
 html[data-theme="escuro"] .manda__btn--solid { background: var(--cream); color: var(--roxo); }
 html[data-theme="escuro"] .manda__btn--outline { border-color: var(--cream); color: var(--cream); background: transparent; }
