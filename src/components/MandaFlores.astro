@@ -92,7 +92,7 @@ import { SITE } from "../data/site.js";
           <button type="button" id="manda-share" class="manda__btn manda__btn--solid eyebrow tap-target" disabled>
             Compartilhar
           </button>
-          <button type="button" id="manda-story" class="manda__btn manda__btn--outline eyebrow tap-target" disabled>Story</button>
+          {SITE.showStoryButton && <button type="button" id="manda-story" class="manda__btn manda__btn--outline eyebrow tap-target" disabled>Story</button>}
           <button type="button" id="manda-download" class="manda__btn manda__btn--outline eyebrow tap-target" disabled>
             Baixar
           </button>
@@ -179,7 +179,7 @@ import { SITE } from "../data/site.js";
   const textarea = document.getElementById("manda-message") as HTMLTextAreaElement;
   const count = document.getElementById("manda-count") as HTMLSpanElement;
   const shareBtn = document.getElementById("manda-share") as HTMLButtonElement;
-  const storyBtn = document.getElementById("manda-story") as HTMLButtonElement;
+  const storyBtn = document.getElementById("manda-story") as HTMLButtonElement | null;
   const downloadBtn = document.getElementById("manda-download") as HTMLButtonElement;
   const clipboardBtn = document.getElementById("manda-clipboard") as HTMLButtonElement;
   const feedback = document.getElementById("manda-feedback") as HTMLParagraphElement;
@@ -201,7 +201,7 @@ import { SITE } from "../data/site.js";
     shareBtn.disabled = !hasText;
     downloadBtn.disabled = !hasText;
     clipboardBtn.disabled = !hasText;
-    storyBtn.disabled = !hasText;
+    if (storyBtn) storyBtn.disabled = !hasText;
   }
 
   flowerBtns.forEach((btn) => {
@@ -381,7 +381,7 @@ import { SITE } from "../data/site.js";
     thanksOrigin = document.activeElement as HTMLElement;
     thanks.removeAttribute("hidden");
     document.body.classList.add("modal-open");
-    shareBtn.disabled = true; downloadBtn.disabled = true; clipboardBtn.disabled = true; storyBtn.disabled = true;
+    shareBtn.disabled = true; downloadBtn.disabled = true; clipboardBtn.disabled = true; if (storyBtn) storyBtn.disabled = true;
     (document.getElementById("thanks-title") as HTMLElement)?.focus();
   }
   function closeThanks(reset = false) {
@@ -586,9 +586,11 @@ import { SITE } from "../data/site.js";
     transition: all 0.2s var(--ease-out);
   }
 
-  .flower-btn:hover {
-    background: rgba(59, 13, 30, 0.18);
-    transform: translateY(-2px);
+  @media (hover: hover) and (pointer: fine) {
+    .flower-btn:hover {
+      background: rgba(59, 13, 30, 0.18);
+      transform: translateY(-2px);
+    }
   }
 
   .flower-btn[aria-checked="true"] {
@@ -734,8 +736,10 @@ import { SITE } from "../data/site.js";
     color: var(--roxo);
   }
 
-  .manda__btn--outline:hover:not(:disabled) {
-    background: rgba(59, 13, 30, 0.1);
+  @media (hover: hover) and (pointer: fine) {
+    .manda__btn--outline:hover:not(:disabled) {
+      background: rgba(59, 13, 30, 0.1);
+    }
   }
 
   .manda__btn--ghost {

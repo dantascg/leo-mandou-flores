@@ -3,6 +3,8 @@ export const SITE = {
   releaseYear: 2026,
   // Preencha com o link da campanha para trocar os ícones por um botão PRÉ-SAVE.
   presave: "https://symphonic.fm/leo-mandou-flores",
+  // Altere para true para exibir novamente o botao STORY no formulario.
+  showStoryButton: false,
   // No lançamento, basta substituir os hrefs abaixo pelos links finais do álbum.
   album: {
     spotify: "https://open.spotify.com/intl-pt/artist/0H1Vd2f6hQTru3k1nHl6O2",
