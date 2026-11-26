@@ -5,7 +5,7 @@ import { SITE } from "../data/site.js";
 <section id="top" class="hero panel panel--rosa">
   <!-- Logo única: hero-logo.png (flores + wordmark em um só arquivo) -->
   <div class="hero__center">
-    <div id="recipient-banner" class="recipient-banner" hidden><span id="recipient-name"></span>, VOCÊ RECEBEU UMA FLOR 🌸 <a href="#manda-flores">mande uma de volta</a></div>
+    <div id="recipient-banner" class="recipient-banner" hidden><span id="recipient-name"></span>, VOCÊ RECEBEU UMA FLOR <a href="#manda-flores">mande uma de volta</a></div>
     <h1 class="hero__logo-wrap">
       <span class="sr-only">Léo Mandou Flores</span>
       <img
@@ -19,7 +19,16 @@ import { SITE } from "../data/site.js";
       />
     </h1>
 
-    <div class="release-countdown" id="release-countdown" aria-label="O álbum sai em 05 de dezembro"><span>05.12</span></div>
+    <div class="release-countdown" id="release-countdown" aria-label="O álbum sai em 05 de dezembro">
+      <span class="release-countdown__label">LANÇAMENTO 05.12</span>
+      <span class="release-countdown__blocks" aria-hidden="true">
+        <span class="release-countdown__block"><strong id="release-days">00</strong><small>DIAS</small></span>
+        <span class="release-countdown__separator" aria-hidden="true"></span>
+        <span class="release-countdown__block"><strong id="release-hours">00</strong><small>HORAS</small></span>
+        <span class="release-countdown__separator" aria-hidden="true"></span>
+        <span class="release-countdown__block"><strong id="release-minutes">00</strong><small>MIN</small></span>
+      </span>
+    </div>
     <div class="hero__streams" aria-label="Ouça o álbum">
       {SITE.presave ? <a class="hero__presave tap-target eyebrow" href={SITE.presave} target="_blank" rel="noopener noreferrer">PRÉ-SAVE</a> : null}
       {
@@ -67,7 +76,12 @@ import { SITE } from "../data/site.js";
     const days = Math.floor(minutes / 1440);
     const hours = Math.floor((minutes % 1440) / 60);
     const mins = minutes % 60;
-    countdown.textContent = `SAI EM ${days}D ${hours}H ${mins}M`;
+    const daysEl = document.getElementById("release-days");
+    const hoursEl = document.getElementById("release-hours");
+    const minutesEl = document.getElementById("release-minutes");
+    if (daysEl) daysEl.textContent = String(days).padStart(2, "0");
+    if (hoursEl) hoursEl.textContent = String(hours).padStart(2, "0");
+    if (minutesEl) minutesEl.textContent = String(mins).padStart(2, "0");
     countdown.setAttribute("aria-label", `O álbum sai em ${days} dias, ${hours} horas e ${mins} minutos`);
   };
   updateCountdown();
@@ -104,7 +118,13 @@ import { SITE } from "../data/site.js";
 
   .recipient-banner { max-width: 38rem; font: 700 var(--fs-xs) var(--font-main); letter-spacing: .12em; color: var(--roxo); }
   .recipient-banner a { display: block; margin-top: .45rem; text-decoration: underline; letter-spacing: .06em; }
-  .release-countdown { min-height: 1.2rem; color: var(--roxo); font: 700 var(--fs-xs) var(--font-main); letter-spacing: .18em; }
+  .release-countdown { display: grid; justify-items: center; gap: .65rem; min-height: 5.8rem; color: var(--roxo); }
+  .release-countdown__label { font: 600 .72rem var(--font-main); letter-spacing: .12em; }
+  .release-countdown__blocks { display: flex; align-items: stretch; gap: clamp(.7rem, 2vw, 1.5rem); }
+  .release-countdown__block { display: grid; justify-items: center; gap: .1rem; min-width: 3.3rem; }
+  .release-countdown__block strong { font: 800 clamp(2.5rem, 5vw, 3rem)/.9 var(--font-main); font-variant-numeric: tabular-nums; }
+  .release-countdown__block small { font: 600 .7rem var(--font-main); letter-spacing: .12em; }
+  .release-countdown__separator { width: 1px; background: currentColor; opacity: .3; }
   .hero__presave { padding: .75rem 1.3rem; background: var(--roxo); color: var(--cream); }
 
   /* Logo única — responsiva e estática */
@@ -174,5 +194,11 @@ import { SITE } from "../data/site.js";
     width: 28px;
     height: 16px;
     display: block;
+  }
+
+  @media (max-width: 520px) {
+    .hero__center { gap: 2rem; }
+    .release-countdown__block { min-width: 2.7rem; }
+    .release-countdown__block strong { font-size: 2rem; }
   }
 </style>
