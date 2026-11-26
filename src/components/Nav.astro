@@ -136,6 +136,15 @@ const links = [
     .nav__link { font-size: .64rem; letter-spacing: .02em; }
     .theme-toggle { padding: 0; }
   }
+
+  @media (max-width: 480px) {
+    .nav { padding-inline: .75rem; }
+    .nav__links { gap: 14px; }
+    .nav__link,
+    .theme-toggle { min-height: 44px; }
+    .nav__link { display: inline-flex; align-items: center; font-size: .75rem; letter-spacing: .02em; }
+    .theme-toggle { width: 18px; margin-left: 2px; }
+  }
 </style>
 
 <script>
