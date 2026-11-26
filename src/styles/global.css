@@ -79,6 +79,7 @@
 }
 
 html {
+  background: var(--rosa);
   scroll-behavior: smooth;
 }
 
@@ -110,7 +111,7 @@ html {
 }
 
 body {
-  background: var(--roxo);
+  background: var(--rosa);
   color: var(--cream);
   font-family: var(--font-corpo);
   -webkit-font-smoothing: antialiased;

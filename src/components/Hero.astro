@@ -5,7 +5,7 @@ import { SITE } from "../data/site.js";
 <section id="top" class="hero panel panel--rosa">
   <!-- Logo única: hero-logo.png (flores + wordmark em um só arquivo) -->
   <div class="hero__center">
-    <h1 class="hero__logo-wrap reveal">
+    <h1 class="hero__logo-wrap">
       <span class="sr-only">Léo Mandou Flores</span>
       <img
         src="/hero-logo.png"
@@ -18,7 +18,7 @@ import { SITE } from "../data/site.js";
       />
     </h1>
 
-    <div class="hero__streams reveal" data-delay="0.15">
+    <div class="hero__streams">
       {
         SITE.streaming.map((s) => (
           <a
