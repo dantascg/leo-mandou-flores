@@ -7,7 +7,7 @@ interface Props {
   description?: string;
 }
 
-const title = Astro.props.title ?? "Léo Mandou Flores — álbum | ouça agora";
+const title = Astro.props.title ?? "LÉO MANDOU FLORES | Ouça agora";
 const description = Astro.props.description ?? "Léo Mandou Flores é um álbum para ouvir agora, enviar flores e compartilhar mensagens. Ouça no Spotify, Apple Music, YouTube e SoundCloud.";
 const canonical = new URL(Astro.url.pathname, "https://leomandouflores.com").toString();
 const isPreview = Boolean(import.meta.env.VERCEL_ENV && import.meta.env.VERCEL_ENV !== "production");
@@ -20,7 +20,7 @@ const graph = {
       "@type": "MusicAlbum",
       name: "Léo Mandou Flores",
       byArtist: { "@type": "Person", name: artist },
-      image: "https://leomandouflores.com/og.png",
+      image: "https://leomandouflores.com/og-cover.jpg",
       url: "https://leomandouflores.com/",
       sameAs: SITE.streaming.filter((stream) => stream.href !== "#").map((stream) => stream.href),
     },
@@ -48,15 +48,18 @@ const graph = {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content="https://leomandouflores.com/og.png" />
+    <meta property="og:image" content="https://leomandouflores.com/og-cover.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:alt" content="Capa do álbum Léo Mandou Flores" />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content="music.album" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:site_name" content="Léo Mandou Flores" />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="https://leomandouflores.com/og.png" />
+    <meta name="twitter:image" content="https://leomandouflores.com/og-cover.jpg" />
     <script type="application/ld+json" set:html={JSON.stringify(graph)}></script>
   </head>
   <body>
