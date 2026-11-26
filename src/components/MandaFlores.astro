@@ -74,8 +74,18 @@ import { FLOWERS } from "../data/flowers.js";
           <button type="button" id="manda-download" class="manda__btn manda__btn--outline eyebrow tap-target" disabled>
             Baixar
           </button>
-          <button type="button" id="manda-clipboard" class="manda__btn manda__btn--ghost eyebrow tap-target" disabled>
-            Copiar imagem
+          <button
+            type="button"
+            id="manda-clipboard"
+            class="manda__btn manda__btn--outline manda__btn--icon eyebrow tap-target"
+            aria-label="Copiar imagem"
+            title="Copiar imagem"
+            disabled
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24" focusable="false">
+              <rect x="8" y="3" width="11" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8" />
+              <rect x="4" y="8" width="11" height="13" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8" />
+            </svg>
           </button>
         </div>
         <p class="manda__feedback eyebrow" id="manda-feedback" aria-live="polite"></p>
@@ -387,7 +397,8 @@ import { FLOWERS } from "../data/flowers.js";
     padding: 1rem 1.1rem;
     font-family: var(--font-corpo);
     font-size: 1.05rem;
-    color: rgba(59, 13, 30, 0.7);
+    color: var(--roxo);
+    font-weight: 500;
     background: rgba(59, 13, 30, 0.1);
     border: 1px solid rgba(59, 13, 30, 0.35);
     transition: border-color 0.2s, background 0.2s;
@@ -395,7 +406,7 @@ import { FLOWERS } from "../data/flowers.js";
 
   .manda__input::placeholder {
     color: var(--roxo);
-    opacity: 0.45;
+    opacity: 0.6;
   }
 
   .manda__input:focus-visible {
@@ -506,7 +517,8 @@ import { FLOWERS } from "../data/flowers.js";
     font-family: var(--font-corpo);
     font-size: 1.05rem;
     line-height: 1.5;
-    color: rgba(59, 13, 30, 0.7);
+    color: var(--roxo);
+    font-weight: 500;
     background: rgba(59, 13, 30, 0.1);
     border: 1px solid rgba(59, 13, 30, 0.35);
     transition: border-color 0.2s, background 0.2s;
@@ -514,7 +526,7 @@ import { FLOWERS } from "../data/flowers.js";
 
   .manda__textarea::placeholder {
     color: var(--roxo);
-    opacity: 0.45;
+    opacity: 0.6;
   }
 
   .manda__textarea:focus-visible {
@@ -533,7 +545,7 @@ import { FLOWERS } from "../data/flowers.js";
   .manda__actions {
     display: flex;
     gap: 0.75rem;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .manda__btn {
@@ -541,8 +553,21 @@ import { FLOWERS } from "../data/flowers.js";
     align-items: center;
     gap: 0.5rem;
     padding: 0.9rem 1.5rem;
+    min-height: 3rem;
     font-weight: 700;
     transition: opacity 0.2s, background 0.2s, transform 0.15s;
+  }
+
+  .manda__btn--icon {
+    width: 3.2rem;
+    padding: 0.9rem;
+    justify-content: center;
+  }
+
+  .manda__btn--icon svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: block;
   }
 
   .manda__btn--solid {
@@ -575,7 +600,20 @@ import { FLOWERS } from "../data/flowers.js";
   .manda__feedback {
     margin-top: 0.9rem;
     color: var(--roxo);
+    font-weight: 600;
+    letter-spacing: 0.08em;
     min-height: 1.2em;
+  }
+
+  @media (max-width: 480px) {
+    .manda__actions {
+      gap: 0.5rem;
+    }
+
+    .manda__btn:not(.manda__btn--icon) {
+      padding-left: 1.15rem;
+      padding-right: 1.15rem;
+    }
   }
 
   /* ── Cartão: mesmo rosa da seção + borda roxa arredondada ── */
