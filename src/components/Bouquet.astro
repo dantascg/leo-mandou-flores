@@ -153,10 +153,10 @@
     } else {
       for (let k = 0; k < 5; k++) {
         sc.appendChild(
-          el("ellipse", { cx: 0, cy: -24, rx: 17, ry: 28, fill: f.petal, stroke: STROKE, "stroke-width": 2.5, transform: `rotate(${k * 72})` })
+          el("ellipse", { class: "bq-petal", cx: 0, cy: -24, rx: 17, ry: 28, fill: f.petal, stroke: STROKE, "stroke-width": 2.5, transform: `rotate(${k * 72})` })
         );
       }
-      sc.appendChild(el("circle", { r: 12, fill: f.center, stroke: STROKE, "stroke-width": 2 }));
+      sc.appendChild(el("circle", { class: "bq-center", r: 12, fill: f.center, stroke: STROKE, "stroke-width": 2 }));
     }
     pop.appendChild(sc);
     outer.appendChild(pop);
@@ -222,7 +222,7 @@
       fl.outer.setAttribute("transform", `translate(${x} ${y}) rotate(${s.rot + side * 360 * e}) scale(${0.6 + 0.4 * e})`);
 
       if (frame++ % 2 === 0 && k < 1) {            // trilha de partículas
-        const dot = el("circle", { cx: x, cy: y, r: 1.5 + Math.random() * 2.5, fill: fl.color, opacity: 0.7 });
+        const dot = el("circle", { class: "bq-trail", cx: x, cy: y, r: 1.5 + Math.random() * 2.5, fill: fl.color, opacity: 0.7 });
         trailLayer.appendChild(dot);
         const anim = dot.animate([{ opacity: 0.7 }, { opacity: 0 }], { duration: 800, fill: "forwards" });
         anim.onfinish = () => dot.remove();
@@ -461,6 +461,11 @@
     height: auto;
     overflow: visible;
   }
+
+  :global(html[data-theme="escuro"] .bouquet__stage .bq-petal) { fill: var(--cream); }
+  :global(html[data-theme="escuro"] .bouquet__stage .bq-center) { fill: var(--roxo-soft); }
+  :global(html[data-theme="escuro"] .bouquet__stage .bq-trail) { fill: var(--cream); }
+  :global(html[data-theme="escuro"] .bouquet__stage polygon) { fill: var(--roxo-soft); stroke: var(--cream); }
 </style>
 
 <!-- Classes criadas pelo script (caule/pop das flores) + @keyframes: precisam ser globais -->
@@ -473,6 +478,8 @@
     stroke-dasharray: 1;
     stroke-dashoffset: 0;
   }
+
+  html[data-theme="escuro"] .bq-stem { stroke: var(--cream); }
 
   .bq-grow {
     animation: bq-grow 0.7s ease-out both;
