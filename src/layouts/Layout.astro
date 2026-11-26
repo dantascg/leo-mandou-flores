@@ -31,7 +31,34 @@ const graph = {
 
 <html lang="pt-BR">
   <head>
-    <style is:inline>html, body { background: #ca0053; }</style>
+    <style is:inline>
+      html, body { background: #ca0053; }
+      html[data-theme="escuro"], html[data-theme="escuro"] body { background: #3b0d1e; }
+      #site-loader { position: fixed; inset: 0; z-index: 200; display: none; place-items: center; background: #ca0053; opacity: 1; transition: opacity .3s ease; }
+      html.loader-first #site-loader { display: grid; animation: loader-safety 4s ease forwards; }
+      html[data-theme="escuro"] #site-loader { background: #3b0d1e; }
+      #site-loader.is-hidden { opacity: 0; pointer-events: none; }
+      html.loader-first #site-loader.is-hidden { animation: loader-fade .3s ease forwards; }
+      #site-loader-flower { width: 56px; height: 56px; animation: loader-breathe 1.2s ease-in-out infinite; }
+      @keyframes loader-breathe { 50% { transform: scale(1.12) rotate(8deg); } }
+      @keyframes loader-safety { 0%, 92% { opacity: 1; pointer-events: auto; } 100% { opacity: 0; pointer-events: none; } }
+      @keyframes loader-fade { from { opacity: 1; } to { opacity: 0; } }
+      html[data-theme="escuro"] #site-loader-flower { filter: brightness(0) saturate(100%) invert(91%) sepia(13%) saturate(240%) hue-rotate(324deg) brightness(104%); }
+      @media (prefers-reduced-motion: reduce) { #site-loader-flower { animation: none; } #site-loader { transition: none; } }
+    </style>
+    <script is:inline>
+      (() => { try { if (localStorage.getItem("leo-theme") === "escuro") document.documentElement.dataset.theme = "escuro"; } catch {} })();
+    </script>
+    <script is:inline>
+      (() => {
+        let first = true;
+        try {
+          first = !sessionStorage.getItem("leo-loader-seen");
+          if (first) sessionStorage.setItem("leo-loader-seen", "1");
+        } catch {}
+        if (first) document.documentElement.classList.add("loader-first");
+      })();
+    </script>
     <script is:inline>history.scrollRestoration = "manual"; window.scrollTo(0, 0);</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,14 +66,13 @@ const graph = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {isPreview && <meta name="robots" content="noindex" />}
-    <meta name="theme-color" content="#ca0053" />
-    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ca0053" id="theme-color" />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="image" href="/generated/hero-logo-480.avif" imagesrcset="/generated/hero-logo-480.avif 480w, /generated/hero-logo-768.avif 768w, /generated/hero-logo-1024.avif 1024w" imagesizes="(max-width: 520px) 88vw, min(88vw, 672px)" type="image/avif" fetchpriority="high" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content="https://leomandouflores.com/og-cover.jpg" />
@@ -64,6 +90,12 @@ const graph = {
     <script type="application/ld+json" set:html={JSON.stringify(graph)}></script>
   </head>
   <body>
+    <style is:inline>
+      #site-loader { position: fixed; inset: 0; z-index: 200; display: none; place-items: center; }
+      html.loader-first #site-loader { display: grid; }
+    </style>
+    <div id="site-loader" aria-hidden="true"><img id="site-loader-flower" src="/cursor/flower.png" alt="" width="56" height="56" /></div>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
     <div class="grain" aria-hidden="true"></div>
     <slot />
 
@@ -96,6 +128,22 @@ const graph = {
         if (value) { previous = document.activeElement as HTMLElement; close.focus(); }
         else previous?.focus();
       }
+      const loader = document.getElementById("site-loader");
+      if (document.documentElement.classList.contains("loader-first") && loader) {
+        const startedAt = performance.now();
+        const waitForWindow = document.readyState === "complete"
+          ? Promise.resolve()
+          : new Promise<void>((resolve) => window.addEventListener("load", () => resolve(), { once: true }));
+        const waitForFonts = document.fonts?.ready ?? Promise.resolve();
+        const hero = document.querySelector<HTMLImageElement>(".hero__logo");
+        const waitForHero = hero?.decode ? hero.decode().catch(() => undefined) : Promise.resolve();
+        const finish = () => {
+          const remaining = Math.max(0, 1000 - (performance.now() - startedAt));
+          window.setTimeout(() => loader.classList.add("is-hidden"), remaining);
+        };
+        Promise.all([waitForWindow, waitForFonts, waitForHero]).then(finish, finish);
+        window.setTimeout(() => loader.classList.add("is-hidden"), 3800);
+      }
       open.addEventListener("click", () => setModal(true));
       close.addEventListener("click", () => setModal(false));
       modal.addEventListener("click", (event) => { if (event.target === modal) setModal(false); });
@@ -114,7 +162,7 @@ const graph = {
 </html>
 
 <style>
-  .site-footer { background: var(--roxo); color: rgba(246, 233, 222, 0.72); text-align: center; padding: 1.5rem; font: 600 var(--fs-xs) var(--font-main); letter-spacing: .06em; text-transform: uppercase; }
+  .site-footer { background: var(--panel-alt); border-top: 0; color: rgba(246, 233, 222, 0.72); text-align: center; padding: 1.5rem; font: 600 var(--fs-xs) var(--font-main); letter-spacing: .06em; text-transform: uppercase; }
   .privacy-link { color: inherit; background: none; border: 0; padding: .2rem; text-decoration: underline; font: inherit; }
   .privacy-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 1.2rem; background: rgba(59,13,30,.7); }
   .privacy-modal[hidden] { display: none; }
@@ -123,5 +171,7 @@ const graph = {
   .privacy-modal__panel p { max-width: 34rem; font-family: var(--font-text); line-height: 1.5; }
   .privacy-modal__panel a { color: var(--rosa-deep); }
   .privacy-modal__close { position: absolute; top: .4rem; right: .7rem; border: 0; background: none; color: inherit; font-size: 1.8rem; }
+  :global(html[data-theme="escuro"]) .privacy-modal__panel { color: var(--cream); background: var(--roxo-soft); border-color: var(--cream); }
+  :global(html[data-theme="escuro"]) .privacy-modal__panel a { color: var(--cream); }
   .modal-open { overflow: hidden; }
 </style>

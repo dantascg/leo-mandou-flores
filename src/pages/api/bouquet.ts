@@ -8,6 +8,7 @@ import { Redis } from "@upstash/redis";
 const KEY = "bouquet:count";
 const BASELINE = 0;
 const GLOBAL_LIMIT = 300;
+const NTFY_COOLDOWN = "ntfy:cooldown";
 
 function clean(value: string | undefined): string | undefined {
   if (!value) return undefined;
@@ -158,12 +159,39 @@ export const POST: APIRoute = async ({ request }) => {
     const current = (await redis.get<number>(KEY)) ?? BASELINE;
     if (limited) return json({ count: current, persisted: true, limited: true }, { status: 429 });
     const count = await redis.incr(KEY);
+    void notifyNtfy(count, redis);
     return json({ count, persisted: true });
   } catch (error) {
     console.error("[bouquet] erro no POST:", (error as Error)?.message);
     return json({ error: true }, { status: 500 });
   }
 };
+
+async function notifyNtfy(count: number, store: Redis) {
+  const topic = env("NTFY_TOPIC");
+  if (!topic) return;
+  const milestone = count >= 100 && (count % 100 === 0 || [500, 1000, 5000, 10000].includes(count));
+  try {
+    const allowed = milestone || await store.set(NTFY_COOLDOWN, "1", { ex: 60, nx: true });
+    if (!allowed) return;
+    const base = (env("NTFY_URL") ?? "https://ntfy.sh").replace(/\/$/, "");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    await fetch(`${base}/${encodeURIComponent(topic)}`, {
+      method: "POST",
+      headers: {
+        "Title": milestone ? `${count} flores!` : "Nova flor enviada",
+        "Priority": milestone ? "3" : "2",
+        ...(env("NTFY_TOKEN") ? { Authorization: `Bearer ${env("NTFY_TOKEN")}` } : {}),
+      },
+      body: milestone ? `${count} flores` : `Total: ${count} flores`,
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+  } catch (error) {
+    console.error("[bouquet] ntfy indisponível:", (error as Error)?.message);
+  }
+}
 
 export const ALL: APIRoute = async () => json({ error: true }, { status: 405, allow: "GET, POST" });
 

@@ -1,0 +1,23 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Essa flor não existe | Léo Mandou Flores">
+  <main class="not-found" id="conteudo" tabindex="-1">
+    <p class="eyebrow">404</p>
+    <h1>essa flor não existe</h1>
+    <p>Mas ainda dá tempo de mandar uma de verdade.</p>
+    <a class="not-found__link" href="/">voltar para a home</a>
+  </main>
+</Layout>
+
+<style>
+  .not-found { min-height: 80svh; display: grid; place-content: center; justify-items: center; gap: 1rem; padding: 6rem 1.5rem; color: var(--roxo); background: var(--rosa); text-align: center; }
+  .not-found h1 { font: 800 clamp(2.5rem, 8vw, 6rem) var(--font-titulo); text-transform: uppercase; }
+  .not-found p { font-family: var(--font-text); }
+  .not-found__link { margin-top: 1rem; padding: .9rem 1.3rem; color: var(--cream); background: var(--roxo); text-transform: uppercase; letter-spacing: .12em; }
+  :global(html[data-theme="escuro"]) .not-found { color: var(--cream); background: var(--roxo); }
+  :global(html[data-theme="escuro"]) .not-found__link { color: var(--roxo); background: var(--cream); }
+</style>
+
+<meta name="robots" content="noindex" />

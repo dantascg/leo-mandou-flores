@@ -1,17 +1,26 @@
 ---
 import { FLOWERS } from "../data/flowers.js";
+import { SITE } from "../data/site.js";
 ---
 
 <section id="manda-flores" class="manda panel panel--rosa">
   <div class="wrap">
     <!-- Título via imagem exportada do CorelDRAW -->
     <h2 class="manda__title reveal">
-      <img
+      <picture>
+        <source type="image/avif" srcset="/generated/envie-uma-flor-480.avif 480w, /generated/envie-uma-flor-768.avif 768w" sizes="min(80vw, 416px)" />
+        <source type="image/webp" srcset="/generated/envie-uma-flor-480.webp 480w, /generated/envie-uma-flor-768.webp 768w" sizes="min(80vw, 416px)" />
+        <img
         src="/envie-uma-flor.png"
         alt="Envie uma Flor"
         class="manda__title-img"
+        width="1024"
+        height="451"
+        loading="lazy"
+        decoding="async"
         draggable="false"
       />
+      </picture>
     </h2>
 
     <div class="manda__grid">
@@ -24,6 +33,10 @@ import { FLOWERS } from "../data/flowers.js";
             class="manda__input"
             maxlength="40"
             placeholder="Nome de quem vai receber"
+            autocomplete="off"
+            autocapitalize="words"
+            spellcheck="false"
+            aria-label="Para quem é?"
           />
         </div>
 
@@ -36,15 +49,21 @@ import { FLOWERS } from "../data/flowers.js";
                 class="flower-btn"
                 data-flower={f.id}
                 data-flower-name={f.name}
-                aria-pressed={i === 0 ? "true" : "false"}
+                role="radio"
+                aria-checked={i === 0 ? "true" : "false"}
+                tabindex={i === 0 ? 0 : -1}
                 aria-label={f.name}
               >
                 <!-- Se você adicionar a imagem da flor em public/flowers/<id>.png, ela carrega aqui -->
                 {f.icon && (
                   <img
-                    src={f.icon}
+                    src={`/generated/flowers/${f.id}-64.webp`}
                     alt=""
                     class="flower-btn__img"
+                    width="28"
+                    height="28"
+                    loading="lazy"
+                    decoding="async"
                     onerror="this.style.display='none'"
                   />
                 )}
@@ -62,7 +81,9 @@ import { FLOWERS } from "../data/flowers.js";
               class="manda__textarea"
               maxlength="120"
               rows="4"
-              placeholder="Uma frase, um trecho de letra, o que quiser..."></textarea>
+              placeholder="Uma frase, um trecho de letra, o que quiser..."
+              enterkeyhint="done"
+              aria-label="Escreva sua mensagem"></textarea>
             <span class="manda__count" id="manda-count">0/120</span>
           </div>
         </div>
@@ -71,6 +92,7 @@ import { FLOWERS } from "../data/flowers.js";
           <button type="button" id="manda-share" class="manda__btn manda__btn--solid eyebrow tap-target" disabled>
             Compartilhar
           </button>
+          <button type="button" id="manda-story" class="manda__btn manda__btn--outline eyebrow tap-target" disabled>Story</button>
           <button type="button" id="manda-download" class="manda__btn manda__btn--outline eyebrow tap-target" disabled>
             Baixar
           </button>
@@ -89,6 +111,7 @@ import { FLOWERS } from "../data/flowers.js";
           </button>
         </div>
         <p class="manda__feedback eyebrow" id="manda-feedback" aria-live="polite"></p>
+        <p class="sr-only" id="card-description" aria-live="polite">Cartão para alguém, flor Lírio, mensagem: escreva sua mensagem ao lado.</p>
         <div id="turnstile-container" aria-hidden="true"></div>
       </div>
 
@@ -106,24 +129,39 @@ import { FLOWERS } from "../data/flowers.js";
           <div class="card__footer">
             <!-- PNG rasterizado do qr-site.svg para compatibilidade com html2canvas no Safari. -->
             <div class="card__qr-wrap">
-              <img id="card-qr" class="card__qr" src="/qr-site.png" alt="QR code para leomandouflores.com" width="56" height="56" />
+              <img id="card-qr" class="card__qr" src="/generated/qr-site-112.webp" alt="QR code para leomandouflores.com" width="56" height="56" loading="lazy" decoding="async" />
             </div>
             <div class="card__flower-badge" id="card-flower-badge">
               <img
                 id="card-flower-icon"
                 class="card__flower-icon"
-                src="/flowers/lirio.png"
+                src="/generated/flowers/lirio-128.webp"
                 alt=""
+                width="41"
+                height="41"
+                loading="lazy"
+                decoding="async"
               />
               <span id="card-flower-name" class="card__flower-name">Lírio</span>
             </div>
-            <img src="/logo.png" alt="LÉO MANDOU FLORES" class="card__logo" width="150" height="150" />
+            <img src="/generated/logo-192.webp" alt="LÉO MANDOU FLORES" class="card__logo" width="150" height="150" loading="lazy" decoding="async" />
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<div id="thanks-modal" class="thanks-modal" role="dialog" aria-modal="true" aria-labelledby="thanks-title" hidden>
+  <div class="thanks-modal__panel" role="document">
+    <button type="button" id="thanks-close" class="thanks-modal__close" aria-label="Fechar confirmação">×</button>
+    <img class="thanks-modal__flower" src="/cursor/flower.png" alt="" width="40" height="40" />
+    <h2 id="thanks-title" tabindex="-1">FLOR ENVIADA</h2>
+    <p>Obrigado por espalhar flores.</p>
+    <a id="thanks-action" data-presave={SITE.presave} data-spotify={SITE.streaming[0].href} class="manda__btn manda__btn--solid eyebrow" href={SITE.streaming[0].href} target="_blank" rel="noopener">OUÇA O ÁLBUM</a>
+    <button type="button" id="manda-again" class="manda__btn manda__btn--ghost eyebrow">ENVIAR OUTRA FLOR</button>
+  </div>
+</div>
 
 <script>
   const FLOWER_NAMES: Record<string, string> = {
@@ -141,6 +179,7 @@ import { FLOWERS } from "../data/flowers.js";
   const textarea = document.getElementById("manda-message") as HTMLTextAreaElement;
   const count = document.getElementById("manda-count") as HTMLSpanElement;
   const shareBtn = document.getElementById("manda-share") as HTMLButtonElement;
+  const storyBtn = document.getElementById("manda-story") as HTMLButtonElement;
   const downloadBtn = document.getElementById("manda-download") as HTMLButtonElement;
   const clipboardBtn = document.getElementById("manda-clipboard") as HTMLButtonElement;
   const feedback = document.getElementById("manda-feedback") as HTMLParagraphElement;
@@ -150,29 +189,44 @@ import { FLOWERS } from "../data/flowers.js";
   const qrImg = document.getElementById("card-qr") as HTMLImageElement;
   const cardFlowerIcon = document.getElementById("card-flower-icon") as HTMLImageElement;
   const cardFlowerName = document.getElementById("card-flower-name") as HTMLSpanElement;
+  const cardDescription = document.getElementById("card-description") as HTMLParagraphElement;
+  const thanks = document.getElementById("thanks-modal") as HTMLDivElement;
+  const thanksPanel = thanks?.querySelector(".thanks-modal__panel") as HTMLDivElement;
+  const thanksClose = document.getElementById("thanks-close") as HTMLButtonElement;
+  const again = document.getElementById("manda-again") as HTMLButtonElement;
+  let thanksOrigin: HTMLElement | null = null;
 
   function updateButtons() {
     const hasText = textarea.value.trim().length > 0;
     shareBtn.disabled = !hasText;
     downloadBtn.disabled = !hasText;
     clipboardBtn.disabled = !hasText;
+    storyBtn.disabled = !hasText;
   }
 
   flowerBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
-      flowerBtns.forEach((b) => b.setAttribute("aria-pressed", "false"));
-      btn.setAttribute("aria-pressed", "true");
+      flowerBtns.forEach((b) => { b.setAttribute("aria-checked", "false"); b.tabIndex = -1; });
+      btn.setAttribute("aria-checked", "true");
+      btn.tabIndex = 0;
       const requestedFlowerId = btn.dataset.flower || "";
       const flowerId = FLOWER_IDS.has(requestedFlowerId) ? requestedFlowerId : "lirio";
       selectedFlower = flowerId;
       if (cardFlowerIcon) {
-        cardFlowerIcon.src = `/flowers/${flowerId}.png`;
+        cardFlowerIcon.src = `/generated/flowers/${flowerId}-128.webp`;
       }
       if (cardFlowerName) {
         cardFlowerName.textContent = FLOWER_NAMES[flowerId] || btn.dataset.flowerName || "";
       }
     });
   });
+
+  flowerBtns.forEach((btn, index) => btn.addEventListener("keydown", (event) => {
+    if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(event.key)) return;
+    event.preventDefault();
+    const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+    flowerBtns[(index + step + flowerBtns.length) % flowerBtns.length].click();
+  }));
 
   nameInput?.addEventListener("input", () => {
     cardName.textContent = nameInput.value.trim() || "alguém";
@@ -231,6 +285,8 @@ import { FLOWERS } from "../data/flowers.js";
       useCORS: true,
       logging: false,
       onclone: (clonedDocument) => {
+        // A arte exportada sempre usa a paleta original, mesmo quando a prévia está escura.
+        clonedDocument.documentElement.dataset.theme = "padrao";
         const clonedCard = clonedDocument.getElementById("manda-card");
         if (clonedCard instanceof HTMLElement) {
           // O preview mantém borda/cantos; só a cópia exportada vira um retângulo cheio.
@@ -240,6 +296,40 @@ import { FLOWERS } from "../data/flowers.js";
       },
     });
     return new Promise((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
+  }
+
+  async function renderStoryToBlob(): Promise<Blob | null> {
+    const html2canvas = (await import("html2canvas")).default;
+    if (document.fonts?.ready) await document.fonts.ready;
+    await waitForImages(cardElement);
+    const cardCanvas = await html2canvas(cardElement, {
+      scale: 2,
+      backgroundColor: "#ca0053",
+      useCORS: true,
+      logging: false,
+      onclone: (clonedDocument) => {
+        clonedDocument.documentElement.dataset.theme = "padrao";
+      },
+    });
+    const story = document.createElement("canvas"); story.width = 1080; story.height = 1920;
+    const ctx = story.getContext("2d"); if (!ctx) return null;
+    ctx.fillStyle = "#ca0053"; ctx.fillRect(0, 0, story.width, story.height);
+    const width = 864; const height = cardCanvas.height * (width / cardCanvas.width);
+    ctx.drawImage(cardCanvas, (story.width - width) / 2, 410, width, height);
+    ctx.fillStyle = "#f6e9de"; ctx.textAlign = "center"; ctx.font = "700 28px Arial";
+    ctx.fillText("leomandouflores.com", 540, 1740);
+    return new Promise((resolve) => story.toBlob(resolve, "image/png"));
+  }
+
+  function shareText() {
+    const name = nameInput.value.trim().slice(0, 40);
+    const link = `${window.location.origin}/${name ? `?para=${encodeURIComponent(name)}` : ""}`;
+    return `${name ? `${name}, você recebeu uma flor` : "Você recebeu uma flor"} ${link}`;
+  }
+
+  async function downloadBlob(blob: Blob, filename: string) {
+    const url = URL.createObjectURL(blob); const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
   }
 
   const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
@@ -283,6 +373,49 @@ import { FLOWERS } from "../data/flowers.js";
     const turnstileToken = await getTurnstileToken();
     window.dispatchEvent(new CustomEvent("flor-enviada", { detail: { flower: selectedFlower, turnstileToken } }));
   }
+  function showThanks() {
+    const action = document.getElementById("thanks-action") as HTMLAnchorElement | null;
+    const presave = action?.dataset.presave || "";
+    const spotify = action?.dataset.spotify || "https://open.spotify.com/";
+    if (action) { action.href = presave || spotify; action.textContent = presave ? "FAÇA O PRÉ-SAVE" : "OUÇA O ÁLBUM"; }
+    thanksOrigin = document.activeElement as HTMLElement;
+    thanks.removeAttribute("hidden");
+    document.body.classList.add("modal-open");
+    shareBtn.disabled = true; downloadBtn.disabled = true; clipboardBtn.disabled = true; storyBtn.disabled = true;
+    (document.getElementById("thanks-title") as HTMLElement)?.focus();
+  }
+  function closeThanks(reset = false) {
+    thanks.hidden = true;
+    document.body.classList.remove("modal-open");
+    if (reset) {
+      nameInput.value = ""; textarea.value = ""; cardName.textContent = "alguém"; cardMessage.textContent = '"Escreva sua mensagem ao lado..."';
+      cardMessage.classList.add("card__quote--empty"); count.textContent = "0/120"; updateButtons(); nameInput.focus();
+    } else { thanksOrigin?.focus(); }
+  }
+  again?.addEventListener("click", () => closeThanks(true));
+  thanksClose?.addEventListener("click", () => closeThanks());
+  thanks?.addEventListener("click", (event) => { if (event.target === thanks) closeThanks(); });
+  document.addEventListener("keydown", (event) => {
+    if (thanks.hidden) return;
+    if (event.key === "Escape") { event.preventDefault(); closeThanks(); return; }
+    if (event.key !== "Tab") return;
+    const focusable = Array.from(thanksPanel.querySelectorAll<HTMLElement>("a[href], button:not([disabled])"));
+    if (!focusable.length) return;
+    const first = focusable[0]; const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
+
+  storyBtn?.addEventListener("click", async () => {
+    feedback.textContent = "Gerando Story...";
+    const blob = await renderStoryToBlob();
+    if (!blob) { feedback.textContent = "Erro ao gerar imagem."; return; }
+    const file = new File([blob], "leo-mandou-flores-story.png", { type: "image/png" });
+    if (navigator.canShare?.({ files: [file] })) {
+      try { await navigator.share({ title: "LÉO MANDOU FLORES", text: shareText(), files: [file] }); feedback.textContent = "Story compartilhado"; showThanks(); void notifyFlorEnviada(); } catch {}
+    } else { await downloadBlob(blob, "leo-mandou-flores-story.png"); feedback.textContent = "Imagem salva — abra o Instagram e poste no Story"; }
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
+  });
 
   shareBtn?.addEventListener("click", async () => {
     feedback.textContent = "Gerando cartão...";
@@ -291,17 +424,17 @@ import { FLOWERS } from "../data/flowers.js";
       feedback.textContent = "Erro ao gerar imagem.";
       return;
     }
-    const file = new File([blob], "cartao-manda-flores.png", { type: "image/png" });
+    const file = new File([blob], "leo-mandou-flores-cartao.png", { type: "image/png" });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
           title: "LÉO MANDOU FLORES",
-          text: `Você recebeu uma flor! Veja no link: ${window.location.origin}/`,
+          text: shareText(),
           files: [file],
         });
-        feedback.textContent = "Cartão compartilhado ✓";
-        await notifyFlorEnviada();
+        feedback.textContent = "Cartão compartilhado";
+         showThanks(); void notifyFlorEnviada(); if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
       } catch {
         feedback.textContent = "";
       }
@@ -321,14 +454,27 @@ import { FLOWERS } from "../data/flowers.js";
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "cartao-manda-flores.png";
+    a.download = "leo-mandou-flores-cartao.png";
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    feedback.textContent = "Imagem baixada ✓";
-    await notifyFlorEnviada();
+     feedback.textContent = "Imagem baixada";
+     showThanks();
+     void notifyFlorEnviada();
+     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) navigator.vibrate?.(40);
     setTimeout(() => (feedback.textContent = ""), 2500);
+  });
+
+  // A confirmação é uma resposta imediata à ação; não depende da API de contagem.
+  downloadBtn?.addEventListener("click", () => {
+    window.setTimeout(() => {
+      const modal = document.getElementById("thanks-modal");
+      if (modal instanceof HTMLDivElement) {
+        modal.removeAttribute("hidden");
+        document.body.classList.add("modal-open");
+      }
+    }, 0);
   });
 
   clipboardBtn?.addEventListener("click", async () => {
@@ -341,7 +487,7 @@ import { FLOWERS } from "../data/flowers.js";
     try {
       // @ts-ignore — ClipboardItem pode não existir em todo navegador
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      feedback.textContent = "Imagem copiada — já pode colar ✓";
+      feedback.textContent = "Imagem copiada — já pode colar";
     } catch {
       feedback.textContent = "Esse navegador não deixa copiar imagem — usa o Baixar.";
     }
@@ -373,6 +519,9 @@ import { FLOWERS } from "../data/flowers.js";
     display: grid;
     gap: 3rem;
   }
+
+  .manda__config,
+  .manda__preview { min-width: 0; }
 
   @media (min-width: 860px) {
     .manda__grid {
@@ -442,15 +591,19 @@ import { FLOWERS } from "../data/flowers.js";
     transform: translateY(-2px);
   }
 
-  .flower-btn[aria-pressed="true"] {
+  .flower-btn[aria-checked="true"] {
     background: var(--roxo);
     border-color: var(--roxo);
     color: var(--cream);
     box-shadow: 0 4px 12px rgba(59, 13, 30, 0.25);
   }
 
-  .flower-btn[aria-pressed="true"] .flower-btn__img {
+  .flower-btn[aria-checked="true"] .flower-btn__img {
     filter: brightness(0) invert(1);
+  }
+
+  :global(html[data-theme="escuro"]) .flower-btn[aria-checked="true"] .flower-btn__img {
+    filter: none;
   }
 
   .flower-btn__img {
@@ -545,7 +698,7 @@ import { FLOWERS } from "../data/flowers.js";
   .manda__actions {
     display: flex;
     gap: 0.75rem;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
   }
 
   .manda__btn {
@@ -604,6 +757,20 @@ import { FLOWERS } from "../data/flowers.js";
     letter-spacing: 0.08em;
     min-height: 1.2em;
   }
+
+  .thanks-modal { position: fixed; inset: 0; z-index: 110; display: grid; place-items: center; padding: 1rem; background: rgba(27, 5, 14, .72); animation: thanks-fade .2s ease both; }
+  .thanks-modal[hidden] { display: none; }
+  .thanks-modal__panel { position: relative; display: grid; justify-items: center; gap: .8rem; width: min(100%, 23rem); padding: 2.25rem 1.5rem 1.5rem; color: var(--roxo); background: var(--rosa); border: 2px solid var(--roxo); border-radius: 18px; text-align: center; animation: thanks-pop .25s var(--ease-out) both; }
+  .thanks-modal__flower { width: 40px; height: 40px; object-fit: contain; }
+  .thanks-modal__panel h2 { font: 800 2rem/.95 var(--font-titulo); }
+  .thanks-modal__panel p { font-family: var(--font-text); }
+  .thanks-modal__panel .manda__btn { width: 100%; justify-content: center; }
+  .thanks-modal__close { position: absolute; top: .45rem; right: .65rem; padding: .25rem .45rem; color: inherit; font-size: 1.6rem; line-height: 1; }
+  :global(html[data-theme="escuro"]) .thanks-modal__panel { color: var(--cream); background: var(--roxo-soft); border-color: var(--cream); }
+  :global(html[data-theme="escuro"]) .thanks-modal__panel .manda__btn--solid { color: var(--roxo); background: var(--cream); }
+  :global(html[data-theme="escuro"]) .thanks-modal__panel .manda__btn--ghost { color: var(--cream); }
+  @keyframes thanks-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes thanks-pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
 
   @media (max-width: 480px) {
     .manda__actions {
