@@ -39,12 +39,21 @@ const graph = {
       html[data-theme="escuro"] #site-loader { background: #3b0d1e; }
       #site-loader.is-hidden { opacity: 0; pointer-events: none; }
       html.loader-first #site-loader.is-hidden { animation: loader-fade .3s ease forwards; }
-      #site-loader-flower { width: 56px; height: 56px; animation: loader-breathe 1.2s ease-in-out infinite; }
-      @keyframes loader-breathe { 50% { transform: scale(1.12) rotate(8deg); } }
+      .lf { --lf-petal:#ca0053; --lf-line:#f6e9de; --lf-center:#f6e9de; width:72px; height:72px; display:block; }
+      [data-theme="escuro"] .lf { --lf-petal:#57132c; --lf-line:#f6e9de; --lf-center:#f6e9de; }
+      .lf ellipse { fill:var(--lf-petal); stroke:var(--lf-line); stroke-width:1.6; }
+      .lf circle { fill:var(--lf-center); stroke:var(--lf-line); stroke-width:1.6; }
+      .lf-p { transform-origin:0 0; transform:rotate(var(--r)) scale(.75); opacity:.35; animation:lf-seq 1.2s ease-in-out infinite; }
+      @keyframes lf-seq {
+        0%,100% { transform:rotate(var(--r)) translateY(0) scale(.75); opacity:.35; }
+        35%     { transform:rotate(var(--r)) translateY(-3px) scale(1);  opacity:1;   }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lf-p { animation:none; transform:rotate(var(--r)) scale(1); opacity:1; }
+      }
       @keyframes loader-safety { 0%, 92% { opacity: 1; pointer-events: auto; } 100% { opacity: 0; pointer-events: none; } }
       @keyframes loader-fade { from { opacity: 1; } to { opacity: 0; } }
-      html[data-theme="escuro"] #site-loader-flower { filter: brightness(0) saturate(100%) invert(91%) sepia(13%) saturate(240%) hue-rotate(324deg) brightness(104%); }
-      @media (prefers-reduced-motion: reduce) { #site-loader-flower { animation: none; } #site-loader { transition: none; } }
+      @media (prefers-reduced-motion: reduce) { #site-loader { transition: none; } }
     </style>
     <script is:inline>
       (() => { try { if (localStorage.getItem("leo-theme") === "escuro") document.documentElement.dataset.theme = "escuro"; } catch {} })();
@@ -100,7 +109,19 @@ const graph = {
       #site-loader { position: fixed; inset: 0; z-index: 200; display: none; place-items: center; }
       html.loader-first #site-loader { display: grid; }
     </style>
-    <div id="site-loader" aria-hidden="true"><img id="site-loader-flower" src="/cursor/flower.png" alt="" width="56" height="56" /></div>
+    <div id="site-loader" aria-hidden="true">
+      <svg class="lf" viewBox="-34 -34 68 68" role="presentation" aria-hidden="true" focusable="false">
+        <g class="lf-p" style="--r:0deg;animation-delay:0.00s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p" style="--r:45deg;animation-delay:0.15s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p" style="--r:90deg;animation-delay:0.30s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p" style="--r:135deg;animation-delay:0.45s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p" style="--r:180deg;animation-delay:0.60s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p" style="--r:225deg;animation-delay:0.75s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p" style="--r:270deg;animation-delay:0.90s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p" style="--r:315deg;animation-delay:1.05s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <circle r="6"/>
+      </svg>
+    </div>
     <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
     <div class="grain" aria-hidden="true"></div>
     <slot />
