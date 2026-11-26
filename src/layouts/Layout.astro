@@ -31,7 +31,19 @@ const graph = {
 
 <html lang="pt-BR">
   <head>
-    <style is:inline>html, body { background: #ca0053; }</style>
+    <style is:inline>
+      html, body { background: #ca0053; }
+      html[data-theme="escuro"], html[data-theme="escuro"] body { background: #3b0d1e; }
+      #site-loader { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: #ca0053; opacity: 1; transition: opacity .25s ease; }
+      html[data-theme="escuro"] #site-loader { background: #3b0d1e; }
+      #site-loader.is-hidden { opacity: 0; pointer-events: none; }
+      #site-loader-flower { width: 56px; height: 56px; animation: loader-breathe 1.2s ease-in-out infinite; }
+      @keyframes loader-breathe { 50% { transform: scale(1.12) rotate(8deg); } }
+      @media (prefers-reduced-motion: reduce) { #site-loader-flower { animation: none; } #site-loader { transition: none; } }
+    </style>
+    <script is:inline>
+      (() => { try { if (localStorage.getItem("leo-theme") === "escuro") document.documentElement.dataset.theme = "escuro"; } catch {} })();
+    </script>
     <script is:inline>history.scrollRestoration = "manual"; window.scrollTo(0, 0);</script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -39,8 +51,8 @@ const graph = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {isPreview && <meta name="robots" content="noindex" />}
-    <meta name="theme-color" content="#ca0053" />
-    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#ca0053" id="theme-color" />
+    <meta name="color-scheme" content="light dark" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -64,6 +76,8 @@ const graph = {
     <script type="application/ld+json" set:html={JSON.stringify(graph)}></script>
   </head>
   <body>
+    <div id="site-loader" aria-hidden="true"><img id="site-loader-flower" src="/cursor/flower.png" alt="" width="56" height="56" /></div>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
     <div class="grain" aria-hidden="true"></div>
     <slot />
 
@@ -96,6 +110,10 @@ const graph = {
         if (value) { previous = document.activeElement as HTMLElement; close.focus(); }
         else previous?.focus();
       }
+      const loader = document.getElementById("site-loader");
+      const hideLoader = () => loader?.classList.add("is-hidden");
+      window.addEventListener("load", hideLoader, { once: true });
+      document.addEventListener("DOMContentLoaded", () => { document.fonts?.ready.then(hideLoader).catch(hideLoader); window.setTimeout(hideLoader, 1000); }, { once: true });
       open.addEventListener("click", () => setModal(true));
       close.addEventListener("click", () => setModal(false));
       modal.addEventListener("click", (event) => { if (event.target === modal) setModal(false); });

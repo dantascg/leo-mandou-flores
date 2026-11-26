@@ -5,6 +5,7 @@ import { SITE } from "../data/site.js";
 <section id="top" class="hero panel panel--rosa">
   <!-- Logo única: hero-logo.png (flores + wordmark em um só arquivo) -->
   <div class="hero__center">
+    <div id="recipient-banner" class="recipient-banner" hidden><span id="recipient-name"></span>, VOCÊ RECEBEU UMA FLOR 🌸 <a href="#manda-flores">mande uma de volta</a></div>
     <h1 class="hero__logo-wrap">
       <span class="sr-only">Léo Mandou Flores</span>
       <img
@@ -18,13 +19,15 @@ import { SITE } from "../data/site.js";
       />
     </h1>
 
-    <div class="hero__streams">
+    <div class="release-countdown" id="release-countdown" aria-label="O álbum sai em 05 de dezembro"><span>05.12</span></div>
+    <div class="hero__streams" aria-label="Ouça o álbum">
+      {SITE.presave ? <a class="hero__presave tap-target eyebrow" href={SITE.presave} target="_blank" rel="noopener noreferrer">PRÉ-SAVE</a> : null}
       {
-        SITE.streaming.map((s) => (
+        (!SITE.presave ? SITE.streaming : []).map((s) => (
           <a
             href={s.href}
             class="hero__stream tap-target"
-            aria-label={s.name}
+            aria-label={`Ouvir no ${s.name}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -54,6 +57,30 @@ import { SITE } from "../data/site.js";
   </div>
 </section>
 
+<script define:vars={{ releaseDate: SITE.releaseDate }}>
+  const countdown = document.getElementById("release-countdown");
+  const updateCountdown = () => {
+    if (!countdown) return;
+    const remaining = new Date(releaseDate).getTime() - Date.now();
+    if (remaining <= 0) { countdown.hidden = true; return; }
+    const minutes = Math.floor(remaining / 60000);
+    const days = Math.floor(minutes / 1440);
+    const hours = Math.floor((minutes % 1440) / 60);
+    const mins = minutes % 60;
+    countdown.textContent = `SAI EM ${days}D ${hours}H ${mins}M`;
+    countdown.setAttribute("aria-label", `O álbum sai em ${days} dias, ${hours} horas e ${mins} minutos`);
+  };
+  updateCountdown();
+  window.setInterval(updateCountdown, 60000);
+
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("para");
+  if (raw) {
+    const safe = raw.slice(0, 40).replace(/[\u0000-\u001f\u007f]/g, "").trim();
+    if (safe) { const banner = document.getElementById("recipient-banner"); const name = document.getElementById("recipient-name"); if (banner && name) { name.textContent = safe.toLocaleUpperCase("pt-BR"); banner.hidden = false; } }
+  }
+</script>
+
 <style>
   .hero {
     position: relative;
@@ -74,6 +101,11 @@ import { SITE } from "../data/site.js";
     align-items: center;
     gap: 2.5rem;
   }
+
+  .recipient-banner { max-width: 38rem; font: 700 var(--fs-xs) var(--font-main); letter-spacing: .12em; color: var(--roxo); }
+  .recipient-banner a { display: block; margin-top: .45rem; text-decoration: underline; letter-spacing: .06em; }
+  .release-countdown { min-height: 1.2rem; color: var(--roxo); font: 700 var(--fs-xs) var(--font-main); letter-spacing: .18em; }
+  .hero__presave { padding: .75rem 1.3rem; background: var(--roxo); color: var(--cream); }
 
   /* Logo única — responsiva e estática */
   .hero__logo-wrap {

@@ -1,6 +1,17 @@
 // Dados soltos, fáceis de editar sem caçar dentro dos componentes.
 export const SITE = {
   releaseYear: 2026,
+  // Preencha com o link da campanha para trocar os ícones por um botão PRÉ-SAVE.
+  presave: "",
+  // No lançamento, basta substituir os hrefs abaixo pelos links finais do álbum.
+  album: {
+    spotify: "https://open.spotify.com/intl-pt/artist/0H1Vd2f6hQTru3k1nHl6O2",
+    appleMusic: "https://music.apple.com/us/song/i-remain-the-same/1729937841",
+    youtube: "https://www.youtube.com/@leonandradej/videos",
+    soundcloud: "https://soundcloud.com/leonandradej/tracks",
+  },
+  // Meia-noite do dia 5, horário de Brasília.
+  releaseDate: "2026-12-05T00:00:00-03:00",
   instagramHandle: "@leomandouflores",
   instagramUrl: "https://instagram.com/leomandouflores",
 

@@ -25,6 +25,10 @@
   --roxo-soft: #57132c;
   --roxo-softer: #6d1938;
   --cream: #f6e9de;
+  --bg: var(--rosa);
+  --fg: var(--roxo);
+  --accent: var(--roxo);
+  --panel-alt: var(--roxo);
 
   /* ── Fontes ───────────────────────────────────────────────── */
   --font-main: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
@@ -77,6 +81,13 @@
   --container: 1180px;
 }
 
+html[data-theme="escuro"] {
+  --bg: var(--roxo);
+  --fg: var(--cream);
+  --accent: var(--rosa);
+  --panel-alt: var(--roxo-soft);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -116,8 +127,8 @@ html {
 }
 
 body {
-  background: var(--rosa);
-  color: var(--cream);
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
@@ -279,7 +290,7 @@ button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--cream);
+  outline: 3px solid var(--cream);
   outline-offset: 3px;
 }
 
@@ -297,5 +308,40 @@ button {
 
 .panel--rosa :focus-visible {
   outline-color: var(--roxo);
+}
+
+html[data-theme="escuro"] .panel--rosa,
+html[data-theme="escuro"] .panel--roxo { background: var(--panel-alt); color: var(--cream); }
+html[data-theme="escuro"] .panel--rosa { background: var(--roxo); }
+html[data-theme="escuro"] .hero__logo,
+html[data-theme="escuro"] .manda__title-img,
+html[data-theme="escuro"] .nav__logo,
+html[data-theme="escuro"] .hero__stream-icon { filter: brightness(0) saturate(100%) invert(91%) sepia(13%) saturate(240%) hue-rotate(324deg) brightness(104%); mix-blend-mode: normal; }
+html[data-theme="escuro"] .hero__stream { color: var(--cream); background: rgba(246,233,222,.12); }
+html[data-theme="escuro"] .manda__input,
+html[data-theme="escuro"] .manda__textarea { color: var(--cream); background: rgba(246,233,222,.08); border-color: rgba(246,233,222,.45); }
+html[data-theme="escuro"] .manda__input::placeholder,
+html[data-theme="escuro"] .manda__textarea::placeholder,
+html[data-theme="escuro"] .manda__label,
+html[data-theme="escuro"] .manda__feedback,
+html[data-theme="escuro"] .manda__thanks { color: var(--cream); }
+html[data-theme="escuro"] .flower-btn { color: var(--cream); border-color: rgba(246,233,222,.4); background: rgba(246,233,222,.08); }
+html[data-theme="escuro"] .flower-btn[aria-checked="true"] { background: var(--rosa); border-color: var(--rosa); color: var(--cream); }
+html[data-theme="escuro"] .bouquet__title { color: var(--cream); }
+html[data-theme="escuro"] .bouquet__count,
+html[data-theme="escuro"] .bouquet__count #bouquet-count { color: var(--cream); }
+html[data-theme="escuro"] .hero__scroll-hint,
+html[data-theme="escuro"] .recipient-banner,
+html[data-theme="escuro"] .release-countdown { color: var(--cream); }
+html[data-theme="escuro"] .grain { opacity: .08; }
+html[data-theme="escuro"] .petal-trail { background: var(--cream); border-color: var(--cream); }
+
+.skip-link { position: fixed; top: .75rem; left: .75rem; z-index: 150; padding: .7rem 1rem; color: var(--cream); background: var(--roxo); transform: translateY(-180%); transition: transform .2s ease; }
+.skip-link:focus { transform: translateY(0); }
+
+@media (forced-colors: active) {
+  html, body, button, input, textarea { cursor: auto; }
+  button, input, textarea, a { border-color: ButtonText; }
+  svg { stroke: currentColor; }
 }
 
