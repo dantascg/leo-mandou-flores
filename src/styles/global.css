@@ -297,19 +297,3 @@ button {
   outline-color: var(--roxo);
 }
 
-.album-description {
-  padding: 1.5rem 1.5rem 2rem;
-  text-align: center;
-  font: 0.75rem/1.5 var(--font-rotulo);
-}
-
-.album-description p {
-  max-width: 52rem;
-  margin: 0 auto;
-  opacity: .78;
-}
-
-.album-description a {
-  color: inherit;
-  text-decoration: underline;
-}
