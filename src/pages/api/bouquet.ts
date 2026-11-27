@@ -109,9 +109,43 @@ function getClientIP(request: Request): string {
     || "unknown";
 }
 
+const IS_PRODUCTION = env("VERCEL_ENV") === "production";
+// Chaves de teste oficiais do Cloudflare (o siteverify responde hostname "example.com").
+const TEST_SECRETS = /^[123]x0{32}AA$/;
+
+function hostOf(value: string | undefined): string | undefined {
+  return value?.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase() || undefined;
+}
+
+function turnstileHosts(secret: string): Set<string> {
+  const hosts = new Set([
+    "leomandouflores.com",
+    "www.leomandouflores.com",
+    hostOf(env("SITE_HOST")),
+    hostOf(env("VERCEL_PROJECT_PRODUCTION_URL")),
+    ...(IS_PRODUCTION ? [] : [hostOf(env("VERCEL_URL")), hostOf(env("VERCEL_BRANCH_URL"))]),
+  ].filter(Boolean) as string[]);
+  if (!IS_PRODUCTION) {
+    hosts.add("localhost");
+    hosts.add("127.0.0.1");
+    if (TEST_SECRETS.test(secret)) hosts.add("example.com");
+  }
+  return hosts;
+}
+
 async function verifyTurnstile(token: unknown, request: Request): Promise<boolean> {
   const secret = env("TURNSTILE_SECRET_KEY");
-  if (!secret) return true;
+  if (!secret) {
+    if (IS_PRODUCTION) {
+      console.error("[bouquet] TURNSTILE_SECRET_KEY ausente em produção; incremento recusado.");
+      return false;
+    }
+    return true;
+  }
+  if (IS_PRODUCTION && TEST_SECRETS.test(secret)) {
+    console.error("[bouquet] Chave de teste do Turnstile em produção; incremento recusado.");
+    return false;
+  }
   if (typeof token !== "string" || token.length < 10 || token.length > 4096) return false;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
@@ -123,8 +157,10 @@ async function verifyTurnstile(token: unknown, request: Request): Promise<boolea
       signal: controller.signal,
     });
     if (!response.ok) return false;
-    const result = await response.json() as { success?: boolean };
-    return result.success === true;
+    const result = await response.json() as { success?: boolean; hostname?: string };
+    if (result.success !== true) return false;
+    const hostname = typeof result.hostname === "string" ? result.hostname.toLowerCase() : "";
+    return turnstileHosts(secret).has(hostname);
   } catch (error) {
     console.error("[bouquet] Falha na validação do Turnstile:", (error as Error)?.message);
     return false;
@@ -155,7 +191,13 @@ export const POST: APIRoute = async ({ request }) => {
     if (contentType !== "application/json") return json({ error: true }, { status: 415 });
     const body = await request.json() as { turnstileToken?: unknown };
     if (!(await verifyTurnstile(body.turnstileToken, request))) return json({ error: true }, { status: 403 });
-    if (!redis) return json({ count: BASELINE + 1, persisted: false });
+    if (!redis) {
+      if (IS_PRODUCTION) {
+        console.error("[bouquet] Redis ausente em produção; incremento recusado.");
+        return json({ error: true }, { status: 503 });
+      }
+      return json({ count: BASELINE + 1, persisted: false });
+    }
     const { limited } = await checkRateLimit(getClientIP(request));
     const current = (await redis.get<number>(KEY)) ?? BASELINE;
     if (limited) return json({ count: current, persisted: true, limited: true }, { status: 429 });
