@@ -4,6 +4,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { waitUntil } from "@vercel/functions";
 
 const KEY = "bouquet:count";
 const BASELINE = 0;
@@ -159,7 +160,8 @@ export const POST: APIRoute = async ({ request }) => {
     const current = (await redis.get<number>(KEY)) ?? BASELINE;
     if (limited) return json({ count: current, persisted: true, limited: true }, { status: 429 });
     const count = await redis.incr(KEY);
-    void notifyNtfy(count, redis);
+    // waitUntil mantém a função viva até o envio terminar, sem atrasar a resposta.
+    waitUntil(notifyNtfy(count, redis));
     return json({ count, persisted: true });
   } catch (error) {
     console.error("[bouquet] erro no POST:", (error as Error)?.message);
