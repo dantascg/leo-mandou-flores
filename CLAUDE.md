@@ -12,8 +12,11 @@ Repositório PÚBLICO: nunca coloque segredos, dados pessoais ou arquivos intern
 
 ## Estrutura
 
-- `src/components/` — `Nav`, `Hero` (wordmark, contagem regressiva, streaming/pré-save, faixa `?para=`/`?de=`), `MandaFlores` (formulário, prévia do cartão, cartão/Story, modal de obrigado), `Bouquet` (contador).
+- `src/components/` — `Nav`, `Hero` (wordmark, contagem regressiva, streaming/pré-save, faixa `?para=`/`?de=`), `MandaFlores` (formulário com remetente opcional "de" + "para" + mensagem, prévia do cartão, cartão/Story, modal de obrigado com a flor animada em SVG: classe `fe--play` adicionada ao abrir e removida ao fechar, pétalas posicionadas no CSS), `Bouquet` (contador).
+- O remetente (`#manda-from`) aparece no cartão como "de:" só quando preenchido.
 - `src/layouts/Layout.astro` — head, SEO, JSON-LD, tema (script inline anti-pisca), tela de carregamento, modal de privacidade, footer.
+- `scripts/csp-inline-hashes.mjs` — roda no fim do `npm run build`: calcula o hash de cada `<script>` inline das páginas geradas e falha o build se o `script-src` do `vercel.json` não tiver exatamente esses hashes. `npm run csp:update` reescreve os hashes.
+- `vercel.json` — cabeçalhos de segurança e a CSP única do site (`source: "/(.*)"`, vale também para 404). O Astro não gera CSP (sem `security.csp` nem `staticHeaders`), para não haver duas.
 - `src/data/site.js` — **todos os links e configurações editáveis**: `streaming`, `presave`, `releaseDate`, `showStoryButton`. Links nunca ficam escritos direto nos componentes.
 - `src/data/flowers.js` — as flores selecionáveis.
 - `public/generated/` — imagens otimizadas (AVIF/WebP). Todo caminho em `srcset`/preload precisa existir aqui.
@@ -34,6 +37,8 @@ Repositório PÚBLICO: nunca coloque segredos, dados pessoais ou arquivos intern
 - Mudanças grandes ou visuais: branch separada a partir da `main`; merge só depois de testado. Correções pequenas e urgentes podem ir direto na `main`.
 - Commits pequenos, um por mudança significativa, mensagens em português.
 - Sem force push e sem reescrever histórico.
+- Nunca adicionar linhas Co-Authored-By nem qualquer assinatura de IA nas mensagens de commit.
+- A pasta `.omc/` (estado local do oh-my-claudecode) nunca vai para o repositório: fica em `.git/info/exclude`. Num clone novo, acrescente `.omc/` lá antes de usar o oh-my-claudecode.
 
 ## Como trabalhar
 
@@ -50,6 +55,7 @@ Repositório PÚBLICO: nunca coloque segredos, dados pessoais ou arquivos intern
 - API do contador: exige Origin permitida, `Content-Type: application/json`, token Turnstile válido; rate limit por IP e global; erros sem detalhes internos.
 - Segredos só em variáveis de ambiente da Vercel (ver `.env.example`). Nunca imprimir valores de segredos.
 - Cabeçalhos e CSP ficam em `vercel.json`; ao adicionar qualquer recurso externo, atualizar a CSP.
+- Ao mudar qualquer script inline (is:inline ou define:vars, incluindo releaseDate em src/data/site.js), rode npm run csp:update e commite o vercel.json junto; senão o build falha. Trocar presave e links de streaming em site.js não exige isso.
 
 ## Development
 
