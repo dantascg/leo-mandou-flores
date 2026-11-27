@@ -142,7 +142,7 @@ async function readLimitedJson(request: Request): Promise<{ ok: true; value: unk
 
 const IS_PRODUCTION = env("VERCEL_ENV") === "production";
 // Chaves de teste oficiais do Cloudflare (o siteverify responde hostname "example.com").
-const TEST_SECRETS = /^[123]x0{32}AA$/;
+const TEST_SECRETS = /^[123]x0{31}AA$/;
 
 function hostOf(value: string | undefined): string | undefined {
   return value?.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase() || undefined;
