@@ -102,11 +102,42 @@ function isAllowedOrigin(request: Request): boolean {
   }
 }
 
+// Na Vercel só x-vercel-forwarded-for é definido pela plataforma; os outros podem vir do cliente.
 function getClientIP(request: Request): string {
-  return request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim()
-    || request.headers.get("x-real-ip")?.trim()
-    || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-    || "unknown";
+  const trusted = request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
+  if (trusted) return trusted.toLowerCase();
+  if (env("VERCEL")) return "unknown";
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+}
+
+const MAX_BODY_BYTES = 8192;
+
+// Lê o corpo com limite de bytes, sem confiar só no Content-Length.
+async function readLimitedJson(request: Request): Promise<{ ok: true; value: unknown } | { ok: false; status: number }> {
+  const declared = Number(request.headers.get("content-length") ?? "0");
+  if (declared > MAX_BODY_BYTES) return { ok: false, status: 413 };
+  if (!request.body) return { ok: false, status: 400 };
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY_BYTES) {
+      await reader.cancel().catch(() => {});
+      return { ok: false, status: 413 };
+    }
+    chunks.push(value);
+  }
+  try {
+    const text = new TextDecoder().decode(Buffer.concat(chunks));
+    const value = JSON.parse(text);
+    if (!value || typeof value !== "object" || Array.isArray(value)) return { ok: false, status: 400 };
+    return { ok: true, value };
+  } catch {
+    return { ok: false, status: 400 };
+  }
 }
 
 const IS_PRODUCTION = env("VERCEL_ENV") === "production";
@@ -189,7 +220,9 @@ export const POST: APIRoute = async ({ request }) => {
     if (!isAllowedOrigin(request)) return json({ error: true }, { status: 403 });
     const contentType = request.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
     if (contentType !== "application/json") return json({ error: true }, { status: 415 });
-    const body = await request.json() as { turnstileToken?: unknown };
+    const parsed = await readLimitedJson(request);
+    if (!parsed.ok) return json({ error: true }, { status: parsed.status });
+    const body = parsed.value as { turnstileToken?: unknown };
     if (!(await verifyTurnstile(body.turnstileToken, request))) return json({ error: true }, { status: 403 });
     if (!redis) {
       if (IS_PRODUCTION) {
