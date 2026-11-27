@@ -4,6 +4,7 @@ export const prerender = false;
 import type { APIRoute } from "astro";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import { waitUntil } from "@vercel/functions";
 
 const KEY = "bouquet:count";
 const BASELINE = 0;
@@ -101,16 +102,81 @@ function isAllowedOrigin(request: Request): boolean {
   }
 }
 
+// Na Vercel só x-vercel-forwarded-for é definido pela plataforma; os outros podem vir do cliente.
 function getClientIP(request: Request): string {
-  return request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim()
-    || request.headers.get("x-real-ip")?.trim()
-    || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-    || "unknown";
+  const trusted = request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();
+  if (trusted) return trusted.toLowerCase();
+  if (env("VERCEL")) return "unknown";
+  return request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+}
+
+const MAX_BODY_BYTES = 8192;
+
+// Lê o corpo com limite de bytes, sem confiar só no Content-Length.
+async function readLimitedJson(request: Request): Promise<{ ok: true; value: unknown } | { ok: false; status: number }> {
+  const declared = Number(request.headers.get("content-length") ?? "0");
+  if (declared > MAX_BODY_BYTES) return { ok: false, status: 413 };
+  if (!request.body) return { ok: false, status: 400 };
+  const reader = request.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY_BYTES) {
+      await reader.cancel().catch(() => {});
+      return { ok: false, status: 413 };
+    }
+    chunks.push(value);
+  }
+  try {
+    const text = new TextDecoder().decode(Buffer.concat(chunks));
+    const value = JSON.parse(text);
+    if (!value || typeof value !== "object" || Array.isArray(value)) return { ok: false, status: 400 };
+    return { ok: true, value };
+  } catch {
+    return { ok: false, status: 400 };
+  }
+}
+
+const IS_PRODUCTION = env("VERCEL_ENV") === "production";
+// Chaves de teste oficiais do Cloudflare (o siteverify responde hostname "example.com").
+const TEST_SECRETS = /^[123]x0{31}AA$/;
+
+function hostOf(value: string | undefined): string | undefined {
+  return value?.replace(/^https?:\/\//, "").replace(/\/.*$/, "").toLowerCase() || undefined;
+}
+
+function turnstileHosts(secret: string): Set<string> {
+  const hosts = new Set([
+    "leomandouflores.com",
+    "www.leomandouflores.com",
+    hostOf(env("SITE_HOST")),
+    hostOf(env("VERCEL_PROJECT_PRODUCTION_URL")),
+    ...(IS_PRODUCTION ? [] : [hostOf(env("VERCEL_URL")), hostOf(env("VERCEL_BRANCH_URL"))]),
+  ].filter(Boolean) as string[]);
+  if (!IS_PRODUCTION) {
+    hosts.add("localhost");
+    hosts.add("127.0.0.1");
+    if (TEST_SECRETS.test(secret)) hosts.add("example.com");
+  }
+  return hosts;
 }
 
 async function verifyTurnstile(token: unknown, request: Request): Promise<boolean> {
   const secret = env("TURNSTILE_SECRET_KEY");
-  if (!secret) return true;
+  if (!secret) {
+    if (IS_PRODUCTION) {
+      console.error("[bouquet] TURNSTILE_SECRET_KEY ausente em produção; incremento recusado.");
+      return false;
+    }
+    return true;
+  }
+  if (IS_PRODUCTION && TEST_SECRETS.test(secret)) {
+    console.error("[bouquet] Chave de teste do Turnstile em produção; incremento recusado.");
+    return false;
+  }
   if (typeof token !== "string" || token.length < 10 || token.length > 4096) return false;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
@@ -122,8 +188,10 @@ async function verifyTurnstile(token: unknown, request: Request): Promise<boolea
       signal: controller.signal,
     });
     if (!response.ok) return false;
-    const result = await response.json() as { success?: boolean };
-    return result.success === true;
+    const result = await response.json() as { success?: boolean; hostname?: string };
+    if (result.success !== true) return false;
+    const hostname = typeof result.hostname === "string" ? result.hostname.toLowerCase() : "";
+    return turnstileHosts(secret).has(hostname);
   } catch (error) {
     console.error("[bouquet] Falha na validação do Turnstile:", (error as Error)?.message);
     return false;
@@ -152,14 +220,23 @@ export const POST: APIRoute = async ({ request }) => {
     if (!isAllowedOrigin(request)) return json({ error: true }, { status: 403 });
     const contentType = request.headers.get("content-type")?.split(";", 1)[0].trim().toLowerCase();
     if (contentType !== "application/json") return json({ error: true }, { status: 415 });
-    const body = await request.json() as { turnstileToken?: unknown };
+    const parsed = await readLimitedJson(request);
+    if (!parsed.ok) return json({ error: true }, { status: parsed.status });
+    const body = parsed.value as { turnstileToken?: unknown };
     if (!(await verifyTurnstile(body.turnstileToken, request))) return json({ error: true }, { status: 403 });
-    if (!redis) return json({ count: BASELINE + 1, persisted: false });
+    if (!redis) {
+      if (IS_PRODUCTION) {
+        console.error("[bouquet] Redis ausente em produção; incremento recusado.");
+        return json({ error: true }, { status: 503 });
+      }
+      return json({ count: BASELINE + 1, persisted: false });
+    }
     const { limited } = await checkRateLimit(getClientIP(request));
     const current = (await redis.get<number>(KEY)) ?? BASELINE;
     if (limited) return json({ count: current, persisted: true, limited: true }, { status: 429 });
     const count = await redis.incr(KEY);
-    void notifyNtfy(count, redis);
+    // waitUntil mantém a função viva até o envio terminar, sem atrasar a resposta.
+    waitUntil(notifyNtfy(count, redis));
     return json({ count, persisted: true });
   } catch (error) {
     console.error("[bouquet] erro no POST:", (error as Error)?.message);

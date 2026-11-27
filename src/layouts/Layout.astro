@@ -44,6 +44,15 @@ const graph = {
       .lf ellipse { fill:var(--lf-petal); stroke:var(--lf-line); stroke-width:1.6; }
       .lf circle { fill:var(--lf-center); stroke:var(--lf-line); stroke-width:1.6; }
       .lf-p { transform-origin:0 0; transform:rotate(var(--r)) scale(.75); opacity:.35; animation:lf-seq 1.2s ease-in-out infinite; }
+      /* Ângulo e atraso de cada pétala no CSS (sem style inline, por causa da CSP). */
+      .lf-p:nth-of-type(1) { --r:0deg; animation-delay:0.00s; }
+      .lf-p:nth-of-type(2) { --r:45deg; animation-delay:0.15s; }
+      .lf-p:nth-of-type(3) { --r:90deg; animation-delay:0.30s; }
+      .lf-p:nth-of-type(4) { --r:135deg; animation-delay:0.45s; }
+      .lf-p:nth-of-type(5) { --r:180deg; animation-delay:0.60s; }
+      .lf-p:nth-of-type(6) { --r:225deg; animation-delay:0.75s; }
+      .lf-p:nth-of-type(7) { --r:270deg; animation-delay:0.90s; }
+      .lf-p:nth-of-type(8) { --r:315deg; animation-delay:1.05s; }
       @keyframes lf-seq {
         0%,100% { transform:rotate(var(--r)) translateY(0) scale(.75); opacity:.35; }
         35%     { transform:rotate(var(--r)) translateY(-3px) scale(1);  opacity:1;   }
@@ -102,7 +111,7 @@ const graph = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://leomandouflores.com/og-cover.jpg" />
-    <script type="application/ld+json" set:html={JSON.stringify(graph)}></script>
+    <script type="application/ld+json" set:html={JSON.stringify(graph).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026")}></script>
   </head>
   <body>
     <style is:inline>
@@ -111,14 +120,14 @@ const graph = {
     </style>
     <div id="site-loader" aria-hidden="true">
       <svg class="lf" viewBox="-34 -34 68 68" role="presentation" aria-hidden="true" focusable="false">
-        <g class="lf-p" style="--r:0deg;animation-delay:0.00s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
-        <g class="lf-p" style="--r:45deg;animation-delay:0.15s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
-        <g class="lf-p" style="--r:90deg;animation-delay:0.30s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
-        <g class="lf-p" style="--r:135deg;animation-delay:0.45s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
-        <g class="lf-p" style="--r:180deg;animation-delay:0.60s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
-        <g class="lf-p" style="--r:225deg;animation-delay:0.75s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
-        <g class="lf-p" style="--r:270deg;animation-delay:0.90s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
-        <g class="lf-p" style="--r:315deg;animation-delay:1.05s"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
+        <g class="lf-p"><ellipse cx="0" cy="-15" rx="5.2" ry="9.5"/></g>
         <circle r="6"/>
       </svg>
     </div>
