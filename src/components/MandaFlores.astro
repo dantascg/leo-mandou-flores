@@ -348,8 +348,17 @@ import { SITE } from "../data/site.js";
 
   function shareText() {
     const name = nameInput.value.trim().slice(0, 40);
-    const link = `${window.location.origin}/${name ? `?para=${encodeURIComponent(name)}` : ""}`;
-    return `${name ? `${name}, você recebeu uma flor` : "Você recebeu uma flor"} ${link}`;
+    const from = fromInput.value.trim().slice(0, 40);
+    const query = [
+      name ? `para=${encodeURIComponent(name)}` : "",
+      from ? `de=${encodeURIComponent(from)}` : "",
+    ].filter(Boolean).join("&");
+    const link = `${window.location.origin}/${query ? `?${query}` : ""}`;
+    let message = "Você recebeu uma flor";
+    if (name && from) message = `${name}, você recebeu uma flor de ${from}`;
+    else if (name) message = `${name}, você recebeu uma flor`;
+    else if (from) message = `Você recebeu uma flor de ${from}`;
+    return `${message} ${link}`;
   }
 
   async function downloadBlob(blob: Blob, filename: string) {
