@@ -26,7 +26,22 @@ import { SITE } from "../data/site.js";
     <div class="manda__grid">
       <div class="manda__config reveal" data-delay="0.1">
         <div class="manda__field">
-          <p class="eyebrow manda__label">Para quem é?</p>
+          <label for="manda-from" class="eyebrow manda__label">De quem é?</label>
+          <input
+            id="manda-from"
+            type="text"
+            class="manda__input"
+            maxlength="40"
+            placeholder="Seu nome"
+            autocomplete="off"
+            autocapitalize="words"
+            spellcheck="false"
+            aria-label="De quem é?"
+          />
+        </div>
+
+        <div class="manda__field">
+          <label for="manda-name" class="eyebrow manda__label">Para quem é?</label>
           <input
             id="manda-name"
             type="text"
@@ -535,6 +550,7 @@ import { SITE } from "../data/site.js";
   }
 
   .manda__label {
+    display: block;
     font-family: var(--font-rotulo);
     color: var(--roxo);
     font-weight: 700;
