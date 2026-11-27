@@ -135,6 +135,7 @@ import { SITE } from "../data/site.js";
 
         <!-- Card: rosa do projeto + borda roxa arredondada -->
         <div class="card" id="manda-card">
+          <p class="card__to card__from" id="card-from" hidden>de: <span id="card-from-name"></span></p>
           <p class="card__to">para: <span id="card-name">alguém</span></p>
 
           <div class="card__quote-box">
@@ -190,6 +191,7 @@ import { SITE } from "../data/site.js";
   const FLOWER_IDS = new Set(["lirio", "papoula", "tulipa", "rosa"]);
 
   const flowerBtns = document.querySelectorAll<HTMLButtonElement>(".flower-btn");
+  const fromInput = document.getElementById("manda-from") as HTMLInputElement;
   const nameInput = document.getElementById("manda-name") as HTMLInputElement;
   const textarea = document.getElementById("manda-message") as HTMLTextAreaElement;
   const count = document.getElementById("manda-count") as HTMLSpanElement;
@@ -198,6 +200,8 @@ import { SITE } from "../data/site.js";
   const downloadBtn = document.getElementById("manda-download") as HTMLButtonElement;
   const clipboardBtn = document.getElementById("manda-clipboard") as HTMLButtonElement;
   const feedback = document.getElementById("manda-feedback") as HTMLParagraphElement;
+  const cardFrom = document.getElementById("card-from") as HTMLParagraphElement;
+  const cardFromName = document.getElementById("card-from-name") as HTMLSpanElement;
   const cardName = document.getElementById("card-name") as HTMLSpanElement;
   const cardMessage = document.getElementById("card-message") as HTMLParagraphElement;
   const cardElement = document.getElementById("manda-card") as HTMLElement;
@@ -242,6 +246,12 @@ import { SITE } from "../data/site.js";
     const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
     flowerBtns[(index + step + flowerBtns.length) % flowerBtns.length].click();
   }));
+
+  fromInput?.addEventListener("input", () => {
+    const from = fromInput.value.trim().slice(0, 40);
+    cardFromName.textContent = from;
+    cardFrom.hidden = !from;
+  });
 
   nameInput?.addEventListener("input", () => {
     cardName.textContent = nameInput.value.trim() || "alguém";
@@ -403,7 +413,7 @@ import { SITE } from "../data/site.js";
     thanks.hidden = true;
     document.body.classList.remove("modal-open");
     if (reset) {
-      nameInput.value = ""; textarea.value = ""; cardName.textContent = "alguém"; cardMessage.textContent = '"Escreva sua mensagem ao lado..."';
+      fromInput.value = ""; nameInput.value = ""; textarea.value = ""; cardFromName.textContent = ""; cardFrom.hidden = true; cardName.textContent = "alguém"; cardMessage.textContent = '"Escreva sua mensagem ao lado..."';
       cardMessage.classList.add("card__quote--empty"); count.textContent = "0/120"; updateButtons(); nameInput.focus();
     } else { thanksOrigin?.focus(); }
   }
@@ -826,6 +836,11 @@ import { SITE } from "../data/site.js";
 
   .card__to span {
     font-weight: 800;
+  }
+
+  .card__to {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .card__quote-box {
