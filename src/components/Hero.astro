@@ -94,7 +94,7 @@ import { SITE } from "../data/site.js";
   window.setInterval(updateCountdown, 60000);
 
   const params = new URLSearchParams(window.location.search);
-  const safeParam = (value: string | null) => value?.slice(0, 40).replace(/[\u0000-\u001f\u007f]/g, "").trim() || "";
+  const safeParam = (value) => value?.slice(0, 40).replace(/[\u0000-\u001f\u007f]/g, "").trim() || "";
   const recipient = safeParam(params.get("para"));
   const sender = safeParam(params.get("de"));
   if (recipient || sender) {
