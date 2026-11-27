@@ -9,7 +9,8 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/csp-inline-hashes.mjs",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "csp:update": "astro build && node scripts/csp-inline-hashes.mjs --write"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.6",

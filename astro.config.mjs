@@ -8,28 +8,10 @@ import sitemap from '@astrojs/sitemap';
 // contador de flores de verdade). Ver src/pages/api/bouquet.ts.
 export default defineConfig({
   output: 'static',
-  // staticHeaders: a CSP gerada vai como cabeçalho HTTP da Vercel (não <meta>), para valer frame-ancestors.
-  adapter: vercel({ staticHeaders: true }),
+  // A CSP fica no vercel.json e vale para todos os caminhos, inclusive 404.
+  // scripts/csp-inline-hashes.mjs confere os hashes dos scripts inline a cada build.
+  adapter: vercel(),
   site: 'https://leomandouflores.com',
   build: { inlineStylesheets: 'always' },
   integrations: [sitemap()],
-  // CSP com hashes dos scripts e estilos inline, gerados no build (sem 'unsafe-inline' em script-src).
-  security: {
-    csp: {
-      algorithm: 'SHA-256',
-      directives: [
-        "default-src 'self'",
-        "font-src 'self' data:",
-        "img-src 'self' data: blob:",
-        "connect-src 'self' https://challenges.cloudflare.com",
-        "frame-src https://challenges.cloudflare.com",
-        "frame-ancestors 'none'",
-        "base-uri 'self'",
-        "form-action 'self'",
-        "object-src 'none'",
-      ],
-      scriptDirective: { resources: ["'self'", 'https://challenges.cloudflare.com'] },
-      styleDirective: { resources: ["'self'"] },
-    },
-  },
 });

@@ -3,28 +3,75 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()" }
-        ,{ "key": "Cross-Origin-Opener-Policy", "value": "same-origin" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; font-src 'self' data:; img-src 'self' data: blob:; connect-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; script-src 'self' https://challenges.cloudflare.com 'sha256-N7GefRZ8zrcwzzGgP1YUWJfIEzm3Qb1MTzZ7k/j1xp0=' 'sha256-XIcE9mdKChy/tnKXjDUfxwODQosKZMQ+lJ5tPdA683Q=' 'sha256-Yl0DEg4GTkEhFPwIWDBFgx1dWQgh45FBOEDDAryJo0I=' 'sha256-ZQ8Sm1L4KsRVq44DhqIgnVj/HAk0KpLwntDOgXvN5CY=' 'sha256-flaI3CxF5VRriZpuURGKuke8ezlomiptgOFW0sW/Z2c=' 'sha256-w8szi8KJ6ZxSAE9+vNOLXr93Bb41O1NGfbw+LNoQWhE=' 'sha256-x8i8he3Xl/Es68guFYatECKDgHtbLTzVKiwq+DpYMMo='; style-src 'self' 'unsafe-inline'"
+        }
       ]
     },
     {
       "source": "/_astro/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/(cursor|flowers|streaming)/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
     },
     {
       "source": "/(.*)\\.(woff2|woff|avif|webp|png|jpg|jpeg|svg)$",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
   "redirects": [
-    { "source": "/(.*)", "has": [{ "type": "host", "value": "www.leomandouflores.com" }], "destination": "https://leomandouflores.com/$1", "permanent": true }
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.leomandouflores.com"
+        }
+      ],
+      "destination": "https://leomandouflores.com/$1",
+      "permanent": true
+    }
   ]
 }
