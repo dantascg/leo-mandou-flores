@@ -137,17 +137,15 @@ const links = [
   }
 
   @media (max-width: 480px) {
-    .nav__links { gap: clamp(.15rem, 2.4vw, .65rem); }
+    .nav__links { gap: 18px; }
     .nav__link,
     .theme-toggle { min-height: 44px; }
-    .nav__link { display: inline-flex; align-items: center; font-size: .75rem; letter-spacing: .02em; }
-    .theme-toggle { width: 18px; margin-left: 2px; }
+    .nav__link { display: inline-flex; align-items: center; font-size: 12px; letter-spacing: .02em; }
+    .theme-toggle { margin-left: 0; }
   }
 
   @media (max-width: 360px) {
     .nav__logo { height: 46px; }
-    .nav__links { gap: .15rem; }
-    .nav__link { font-size: .66rem; letter-spacing: 0; }
   }
 </style>
 
