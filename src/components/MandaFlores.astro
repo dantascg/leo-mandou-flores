@@ -135,8 +135,10 @@ import { SITE } from "../data/site.js";
 
         <!-- Card: rosa do projeto + borda roxa arredondada -->
         <div class="card" id="manda-card">
-          <p class="card__to card__from" id="card-from" hidden>de: <span id="card-from-name"></span></p>
-          <p class="card__to">para: <span id="card-name">alguém</span></p>
+          <div class="card__names">
+            <p class="card__to card__from" id="card-from" hidden><span class="card__prefix">de:</span> <span id="card-from-name"></span></p>
+            <p class="card__to"><span class="card__prefix">para:</span> <span id="card-name">alguém</span></p>
+          </div>
 
           <div class="card__quote-box">
             <p class="card__quote" id="card-message">"Escreva sua mensagem ao lado..."</p>
@@ -838,9 +840,21 @@ import { SITE } from "../data/site.js";
     font-family: var(--font-card);
     font-size: 1.2rem;
     color: var(--roxo);
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.3rem;
     font-weight: 700;
     letter-spacing: 0.02em;
+  }
+
+  .card__names {
+    margin-bottom: 1.25rem;
+  }
+
+  .card__to:last-child {
+    margin-bottom: 0;
+  }
+
+  .card__to .card__prefix {
+    font-weight: 500;
   }
 
   .card__to span {
