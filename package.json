@@ -14,14 +14,14 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.6",
-    "@astrojs/vercel": "^11.0.20",
+    "@astrojs/vercel": "^11.0.22",
     "@fontsource/barlow": "^5.3.0",
     "@fontsource/barlow-condensed": "^5.3.0",
     "@fontsource/kapakana": "^5.3.0",
-    "@upstash/ratelimit": "^2.2.0",
-    "@upstash/redis": "^1.41.0",
+    "@upstash/ratelimit": "^2.2.2",
+    "@upstash/redis": "^1.41.1",
     "@vercel/functions": "^3.11.4",
-    "astro": "^7.3.8",
+    "astro": "^7.4.13",
     "html2canvas": "^1.4.1"
   },
   "overrides": {
