@@ -404,25 +404,45 @@ import { SITE } from "../data/site.js";
     });
     return turnstilePromise;
   }
-  async function getTurnstileToken(): Promise<string | undefined> {
+  // Widget invisível (modo definido no painel do Cloudflare) com execução sob demanda:
+  // renderiza uma vez com execution: "execute", chama execute() no envio, espera o
+  // callback do token e faz reset() depois. Qualquer falha devolve undefined: o cartão
+  // já foi entregue ao usuário, só o contador deixa de somar.
+  let pendingToken: ((token?: string) => void) | null = null;
+  let turnstileQueue: Promise<unknown> = Promise.resolve();
+  function settleToken(token?: string) {
+    const resolve = pendingToken; pendingToken = null; resolve?.(token);
+  }
+  async function requestTurnstileToken(): Promise<string | undefined> {
     const api = await loadTurnstile();
     if (!api) return undefined;
-    return new Promise((resolve) => {
-      const done = (token?: string) => {
-        if (turnstileWidget !== undefined) api.reset(turnstileWidget);
-        resolve(token);
-      };
-      try {
-        if (turnstileWidget === undefined) {
-          turnstileWidget = api.render("#turnstile-container", {
-            sitekey: TURNSTILE_SITE_KEY, size: "invisible",
-            callback: (token: string) => done(token),
-            "error-callback": () => done(), "expired-callback": () => done(),
-          });
-        }
-        api.execute(turnstileWidget);
-      } catch { done(); }
+    try {
+      if (turnstileWidget === undefined) {
+        turnstileWidget = api.render("#turnstile-container", {
+          sitekey: TURNSTILE_SITE_KEY,
+          execution: "execute",
+          callback: (token: string) => settleToken(token),
+          "error-callback": () => { settleToken(); return true; },
+          "expired-callback": () => settleToken(),
+          "timeout-callback": () => settleToken(),
+        });
+      }
+    } catch { return undefined; }
+    const token = await new Promise<string | undefined>((resolve) => {
+      pendingToken = resolve;
+      const timer = window.setTimeout(() => settleToken(), 15000);
+      const original = pendingToken;
+      pendingToken = (t) => { window.clearTimeout(timer); original(t); };
+      try { api.execute(turnstileWidget); } catch { settleToken(); }
     });
+    try { api.reset(turnstileWidget); } catch {}
+    return token;
+  }
+  function getTurnstileToken(): Promise<string | undefined> {
+    // Um envio por vez: o mesmo widget não pode ser executado em paralelo.
+    const next = turnstileQueue.then(requestTurnstileToken, requestTurnstileToken);
+    turnstileQueue = next.catch(() => undefined);
+    return next.catch(() => undefined);
   }
   async function notifyFlorEnviada() {
     const turnstileToken = await getTurnstileToken();
