@@ -102,7 +102,7 @@ const graph = {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content="https://leomandouflores.com/og-cover.jpg" />
-    <script type="application/ld+json" set:html={JSON.stringify(graph)}></script>
+    <script type="application/ld+json" set:html={JSON.stringify(graph).replace(/</g, "\\u003c").replace(/>/g, "\\u003e").replace(/&/g, "\\u0026")}></script>
   </head>
   <body>
     <style is:inline>
